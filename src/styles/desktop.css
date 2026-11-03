@@ -99,9 +99,6 @@ html[data-window='widget'] #app {
   min-height: 22px;
   padding: 2px;
 }
-.widget-lock-placeholder {
-  visibility: hidden;
-}
 .widget-header .widget-lock,
 .widget-header .widget-lock:hover:not(:disabled),
 .widget-header .widget-lock:active:not(:disabled) {

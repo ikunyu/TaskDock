@@ -49,3 +49,9 @@ npm run typecheck、Rust格式检查及受影响配置/TypeScript文件Prettier�
 未锁定显示打开锁扣，锁定显示闭合锁扣。两种状态保持相同文字颜色、14像素SVG图标和透明按钮背景，悬停/按下不以背景变色区分，保留原点击区域与鼠标穿透/直接解锁逻辑。版本仍为1.1.1，Schema8及全部迁移未改动。
 
 实际执行npm run typecheck、Rust格式检查及npm run package:windows，通过并生成新版EXE、NSIS和签名；更新签名及兼容下载别名核对通过。未运行自动化测试、软件或GUI验收。
+
+### 1.1.1：锁图标透明度修复（内部构建202611030007）
+
+根据用户截图修复锁图标处背景更亮的问题：原先widget与解锁辅助窗口均使用同等alpha，叠加后背景更不透明。现在开锁/关锁图标都由widget一次绘制并沿用窗口不透明度；辅助页不绘制图标，Windows仅设最低非零alpha=1/255以保留整个22像素区域的鼠标命中，避免原来的明显双层底色。锁定与直接点击解锁的交互不变，版本保持1.1.1，Schema8和迁移不变。
+
+实际检查：npm run typecheck、cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked、Rust格式检查及受影响前端Prettier检查通过；npm run package:windows成功生成EXE/NSIS，签名和兼容别名验证通过。未启动软件、运行测试、GUI或操作真实数据库。20%/60%/100%明暗主题下的实际视觉、鼠标解锁以及安装重启仍待用户体验。

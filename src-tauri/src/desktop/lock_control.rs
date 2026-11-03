@@ -120,7 +120,7 @@ pub fn sync(app: &AppHandle, prefs: &DesktopSettings) -> Result<(), AppError> {
         .set_always_on_top(prefs.widget_topmost)
         .map_err(AppError::internal)?;
     window.show().map_err(AppError::internal)?;
-    native::lock_control_style(&window, prefs.widget_opacity).map_err(AppError::internal)
+    native::lock_control_style(&window).map_err(AppError::internal)
 }
 pub fn sync_current(app: &AppHandle) -> Result<(), AppError> {
     let prefs = app

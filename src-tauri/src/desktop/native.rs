@@ -8,10 +8,13 @@ pub fn widget_style(window: &tauri::WebviewWindow, percent: u8, locked: bool) ->
         opacity(target, percent)
     })
 }
-pub fn lock_control_style(window: &tauri::WebviewWindow, percent: u8) -> tauri::Result<()> {
+pub fn lock_control_style(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     on_window_thread(window, move |target| {
         target.set_focusable(false)?;
-        opacity(target, percent)
+        // Input-only hotspot. Alpha=0 makes Win32 pass mouse input through;
+        // the minimum nonzero alpha keeps the whole button clickable. The
+        // visible icon is drawn once by the widget at its configured opacity.
+        layered_alpha(target, 1)
     })
 }
 fn on_window_thread(
@@ -30,8 +33,11 @@ fn on_window_thread(
         .map_err(|e| std::io::Error::other(e).into())
 }
 
-#[cfg(windows)]
 pub fn opacity(window: &tauri::WebviewWindow, percent: u8) -> tauri::Result<()> {
+    layered_alpha(window, ((percent as u32 * 255 + 50) / 100) as u8)
+}
+#[cfg(windows)]
+fn layered_alpha(window: &tauri::WebviewWindow, alpha: u8) -> tauri::Result<()> {
     use windows_sys::Win32::{
         Foundation::{GetLastError, SetLastError},
         UI::WindowsAndMessaging::{
@@ -54,19 +60,13 @@ pub fn opacity(window: &tauri::WebviewWindow, percent: u8) -> tauri::Result<()> 
         {
             return Err(std::io::Error::last_os_error().into());
         }
-        if SetLayeredWindowAttributes(
-            hwnd,
-            0,
-            ((percent as u32 * 255 + 50) / 100) as u8,
-            LWA_ALPHA,
-        ) == 0
-        {
+        if SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA) == 0 {
             return Err(std::io::Error::last_os_error().into());
         }
     }
     Ok(())
 }
 #[cfg(not(windows))]
-pub fn opacity(_window: &tauri::WebviewWindow, _percent: u8) -> tauri::Result<()> {
+fn layered_alpha(_window: &tauri::WebviewWindow, _alpha: u8) -> tauri::Result<()> {
     Ok(())
 }

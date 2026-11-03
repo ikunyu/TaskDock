@@ -329,7 +329,6 @@ function resize(event: MouseEvent) {
         <AppButton
           variant="ghost"
           class="widget-lock"
-          :class="{ 'widget-lock-placeholder': app.desktop.widgetLocked }"
           :aria-label="app.desktop.widgetLocked ? '解锁悬浮窗' : '锁定悬浮窗'"
           :title="app.desktop.widgetLocked ? '点击解锁悬浮窗' : '锁定后鼠标穿透，再点锁形按钮解锁'"
           :aria-pressed="app.desktop.widgetLocked"

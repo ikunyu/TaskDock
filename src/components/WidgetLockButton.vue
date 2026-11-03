@@ -3,7 +3,6 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { bridge } from '../services/bridge';
 import type { SettingsSnapshot } from '../types';
-import AppIcon from './AppIcon.vue';
 const busy = ref(false),
   error = ref('');
 const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -75,9 +74,7 @@ async function unlock() {
     :aria-busy="busy"
     :title="error || '点击解锁悬浮窗'"
     @click="unlock"
-  >
-    <AppIcon name="lock" :size="14" />
-  </button>
+  />
 </template>
 <style>
 html,
