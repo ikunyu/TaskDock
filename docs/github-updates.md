@@ -43,3 +43,9 @@ npm run typecheck、Rust格式检查及受影响配置/TypeScript文件Prettier�
 
 实际静态检查：npm run typecheck、cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked、Rust格式检查和受影响前端Prettier检查通过。未执行npm test/cargo test、启动软件、GUI或数据库操作。Windows点击穿透、按钮定位与解锁、任务栏图标、不同DPI及实际安装重启仍待用户体验。
 正式构建：npm run package:windows成功，保持1.1.1，内部构建202611030005；EXE、NSIS包及多入口前端资源已生成，签名与兼容下载别名核对通过。
+
+### 1.1.1：开锁/关锁图标（内部构建202611030006）
+
+未锁定显示打开锁扣，锁定显示闭合锁扣。两种状态保持相同文字颜色、14像素SVG图标和透明按钮背景，悬停/按下不以背景变色区分，保留原点击区域与鼠标穿透/直接解锁逻辑。版本仍为1.1.1，Schema8及全部迁移未改动。
+
+实际执行npm run typecheck、Rust格式检查及npm run package:windows，通过并生成新版EXE、NSIS和签名；更新签名及兼容下载别名核对通过。未运行自动化测试、软件或GUI验收。

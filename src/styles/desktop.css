@@ -102,6 +102,14 @@ html[data-window='widget'] #app {
 .widget-lock-placeholder {
   visibility: hidden;
 }
+.widget-header .widget-lock,
+.widget-header .widget-lock:hover:not(:disabled),
+.widget-header .widget-lock:active:not(:disabled) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text);
+  box-shadow: none;
+}
 .widget-header button {
   cursor: pointer;
 }

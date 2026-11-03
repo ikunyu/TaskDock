@@ -10,7 +10,9 @@ const paths: Record<string, string> = {
   arrow: 'M5 12h14m-5-5 5 5-5 5',
   close: 'm6 6 12 12M6 18 18 6',
   check: 'm5 12 4 4L19 6',
-  lock: 'M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3',
+  lock: 'M8 10V7a4 4 0 0 1 8 0v3M6 10h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1ZM12 14v3',
+  unlock:
+    'M8 10V6a4 4 0 0 1 7.5-2M6 10h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1ZM12 14v3',
   widget: 'M3 3h18v18H3zM3 8h18M8 8v13',
   spark: 'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z',
   shield: 'm12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6',

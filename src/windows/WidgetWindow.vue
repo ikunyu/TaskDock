@@ -335,7 +335,7 @@ function resize(event: MouseEvent) {
           :aria-pressed="app.desktop.widgetLocked"
           :disabled="locking || store.busy || app.busy"
           @click="windowAction(app.desktop.widgetLocked ? 'unlock' : 'lock')"
-          ><AppIcon name="lock" :size="13"
+          ><AppIcon :name="app.desktop.widgetLocked ? 'lock' : 'unlock'" :size="14"
         /></AppButton>
         <AppButton
           variant="ghost"

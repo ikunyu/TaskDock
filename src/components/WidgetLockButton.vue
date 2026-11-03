@@ -76,7 +76,7 @@ async function unlock() {
     :title="error || '点击解锁悬浮窗'"
     @click="unlock"
   >
-    <AppIcon name="lock" :size="13" />
+    <AppIcon name="lock" :size="14" />
   </button>
 </template>
 <style>
@@ -99,12 +99,12 @@ body,
   padding: 0;
   border: 0;
   border-radius: 3px;
-  background: var(--surface);
-  color: var(--accent);
+  background: transparent;
+  color: var(--text);
 }
 .unlock-control:hover,
 .unlock-control:active {
-  background: var(--surface);
-  color: var(--accent);
+  background: transparent;
+  color: var(--text);
 }
 </style>
