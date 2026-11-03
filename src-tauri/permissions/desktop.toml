@@ -8,5 +8,5 @@ description="Main window validated desktop settings, safe position reset and exp
 commands.allow=["save_desktop_settings","reset_window_positions","exit_app"]
 [[permission]]
 identifier="desktop-widget"
-description="Drag, resize or hide the caller widget only"
-commands.allow=["widget_window_action","set_widget_layout"]
+description="Drag, resize, size content or lock the caller widget only"
+commands.allow=["widget_window_action","set_widget_layout","lock_widget"]

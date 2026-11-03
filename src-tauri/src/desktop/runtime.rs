@@ -33,6 +33,7 @@ pub struct DesktopRuntime {
     pub status: Mutex<RuntimeStatus>,
     pub quitting: AtomicBool,
     pub restoring: AtomicBool,
+    widget_locked: AtomicBool,
     widget_layout: Mutex<WidgetLayout>,
 }
 #[derive(Clone)]
@@ -152,8 +153,22 @@ pub fn set_widget_layout(
         next.expanded_size = (p.width, p.height);
     }
     let at = safe.as_ref().map(|p| (p.x, p.y));
-    if let Err(error) = apply_widget_layout(&w, &next, at) {
+    let prefs = service(app).settings().map_err(AppError::service)?;
+    let operation = apply_widget_layout(&w, &next, at).and_then(|_| {
+        native::widget_style(
+            &w,
+            prefs.desktop.widget_opacity,
+            prefs.desktop.widget_locked,
+        )
+        .map_err(internal)
+    });
+    if let Err(error) = operation {
         let _ = apply_widget_layout(&w, &previous, Some((position.x, position.y)));
+        let _ = native::widget_style(
+            &w,
+            prefs.desktop.widget_opacity,
+            prefs.desktop.widget_locked,
+        );
         *layout = previous;
         return Err(error);
     }
@@ -277,6 +292,16 @@ pub fn restore(app: &AppHandle, reset: bool) -> Result<(), AppError> {
                 apply_placement(app, &p)?;
             }
         }
+        let prefs = service(app).settings().map_err(AppError::service)?;
+        let w = app
+            .get_webview_window("widget")
+            .ok_or_else(|| internal("widget missing"))?;
+        native::widget_style(
+            &w,
+            prefs.desktop.widget_opacity,
+            prefs.desktop.widget_locked,
+        )
+        .map_err(internal)?;
         capture(app)
     })();
     runtime.restoring.store(false, Ordering::SeqCst);
@@ -295,6 +320,13 @@ pub fn present(app: &AppHandle, label: &str) -> Result<(), AppError> {
     if !matches!(label, "main" | "widget" | "quick-entry") {
         return Err(AppError::forbidden());
     }
+    // Widget presentation is called by the existing blocking show-window worker.
+    let rt = app.state::<DesktopRuntime>();
+    let _gate = if label == "widget" {
+        Some(rt.gate.lock().map_err(internal)?)
+    } else {
+        None
+    };
     let w = app
         .get_webview_window(label)
         .ok_or_else(|| internal("configured window missing"))?;
@@ -304,7 +336,23 @@ pub fn present(app: &AppHandle, label: &str) -> Result<(), AppError> {
     }
     w.unminimize().map_err(internal)?;
     w.show().map_err(internal)?;
-    w.set_focus().map_err(internal)?;
+    if label == "widget" {
+        let prefs = service(app).settings().map_err(AppError::service)?;
+        native::widget_style(
+            &w,
+            prefs.desktop.widget_opacity,
+            prefs.desktop.widget_locked,
+        )
+        .map_err(internal)?;
+    }
+    if label != "widget"
+        || !app
+            .state::<DesktopRuntime>()
+            .widget_locked
+            .load(Ordering::SeqCst)
+    {
+        w.set_focus().map_err(internal)?;
+    }
     if label == "quick-entry" {
         let _ = w.emit("taskdock://quick-focus", ());
     }
@@ -315,12 +363,15 @@ fn apply_widget(app: &AppHandle, p: &DesktopSettings) -> Result<(), AppError> {
         .get_webview_window("widget")
         .ok_or_else(|| internal("widget missing"))?;
     w.set_always_on_top(p.widget_topmost).map_err(internal)?;
-    native::opacity(&w, p.widget_opacity).map_err(internal)?;
     if p.widget_visible {
         w.show().map_err(internal)?;
     } else {
         w.hide().map_err(internal)?;
     }
+    native::widget_style(&w, p.widget_opacity, p.widget_locked).map_err(internal)?;
+    app.state::<DesktopRuntime>()
+        .widget_locked
+        .store(p.widget_locked, Ordering::SeqCst);
     Ok(())
 }
 fn set_autostart(app: &AppHandle, enabled: bool) -> Result<(), AppError> {
@@ -486,21 +537,73 @@ pub fn visibility(app: &AppHandle, visible: bool) -> Result<(), AppError> {
         .get_webview_window("widget")
         .ok_or_else(|| internal("widget missing"))?;
     let previous = w.is_visible().map_err(internal)?;
-    if visible {
-        w.show().map_err(internal)?;
-    } else {
-        w.hide().map_err(internal)?;
-    }
-    let snapshot = match service(app).with_database(|db| db.set_widget_visibility(visible)) {
+    let prefs = service(app).settings().map_err(AppError::service)?;
+    let result = (|| {
+        if visible {
+            w.show().map_err(internal)?;
+        } else {
+            w.hide().map_err(internal)?;
+        }
+        native::widget_style(
+            &w,
+            prefs.desktop.widget_opacity,
+            prefs.desktop.widget_locked,
+        )
+        .map_err(internal)?;
+        service(app)
+            .with_database(|db| db.set_widget_visibility(visible))
+            .map_err(AppError::service)
+    })();
+    let snapshot = match result {
         Ok(snapshot) => snapshot,
         Err(error) => {
             let rollback = if previous { w.show() } else { w.hide() };
             if let Err(e) = rollback {
                 log::warn!("widget visibility rollback failed: {e}");
             }
-            return Err(AppError::service(error));
+            let _ = native::widget_style(
+                &w,
+                prefs.desktop.widget_opacity,
+                prefs.desktop.widget_locked,
+            );
+            return Err(error);
         }
     };
+    let _ = app.emit(SETTINGS_EVENT, &snapshot);
+    Ok(())
+}
+pub fn set_widget_locked(app: &AppHandle, locked: bool) -> Result<(), AppError> {
+    let rt = app.state::<DesktopRuntime>();
+    let _gate = rt.gate.lock().map_err(internal)?;
+    if !status(app).ready {
+        return Err(AppError {
+            code: "DESKTOP_STARTING",
+            message: "桌面服务正在初始化，请稍后重试。",
+        });
+    }
+    let old = service(app).settings().map_err(AppError::service)?;
+    let w = app
+        .get_webview_window("widget")
+        .ok_or_else(|| internal("widget missing"))?;
+    let result = (|| {
+        native::widget_style(&w, old.desktop.widget_opacity, locked).map_err(internal)?;
+        service(app)
+            .with_database(|db| db.set_widget_locked(locked))
+            .map_err(AppError::service)
+    })();
+    let snapshot = match result {
+        Ok(snapshot) => snapshot,
+        Err(error) => {
+            if let Err(e) =
+                native::widget_style(&w, old.desktop.widget_opacity, old.desktop.widget_locked)
+            {
+                log::warn!("widget lock rollback failed: {e}");
+                warn(app, "悬浮窗锁定状态恢复失败，请从托盘解锁后重试。");
+            }
+            return Err(error);
+        }
+    };
+    rt.widget_locked.store(locked, Ordering::SeqCst);
     let _ = app.emit(SETTINGS_EVENT, &snapshot);
     Ok(())
 }
@@ -681,9 +784,10 @@ pub fn install_tray(app: &AppHandle) -> tauri::Result<()> {
     let main = MenuItem::with_id(app, "main", "打开主窗口", true, None::<&str>)?;
     let quick = MenuItem::with_id(app, "quick", "快速添加任务", true, None::<&str>)?;
     let widget = MenuItem::with_id(app, "widget", "显示/隐藏悬浮窗", true, None::<&str>)?;
+    let unlock = MenuItem::with_id(app, "unlock-widget", "解锁悬浮窗", true, None::<&str>)?;
     let settings = MenuItem::with_id(app, "settings", "打开设置", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "退出 TaskDock", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&main, &quick, &widget, &settings, &quit])?;
+    let menu = Menu::with_items(app, &[&main, &quick, &widget, &unlock, &settings, &quit])?;
     let mut tray = TrayIconBuilder::with_id("taskdock")
         .tooltip("TaskDock · 本地待办")
         .menu(&menu)
@@ -703,6 +807,14 @@ pub fn install_tray(app: &AppHandle) -> tauri::Result<()> {
                         .and_then(|w| w.is_visible().ok())
                         .unwrap_or(false);
                     if let Err(e) = visibility(&app, !visible) {
+                        warn(&app, e.message);
+                    }
+                });
+            }
+            "unlock-widget" => {
+                let app = app.clone();
+                tauri::async_runtime::spawn_blocking(move || {
+                    if let Err(e) = set_widget_locked(&app, false) {
                         warn(&app, e.message);
                     }
                 });

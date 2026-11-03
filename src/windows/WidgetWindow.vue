@@ -12,6 +12,7 @@ const app = useAppStore(),
   store = useTasksStore();
 const selectedView = ref<'today' | 'plan'>('today');
 const expanded = ref(false);
+const locking = ref(false);
 const fontStyle = computed(() => {
   const fonts = app.desktop;
   return {
@@ -251,11 +252,15 @@ async function openQuick() {
     app.fail(error);
   }
 }
-async function windowAction(action: 'drag' | 'resize' | 'hide') {
+async function windowAction(action: 'drag' | 'resize' | 'hide' | 'lock') {
+  if (action === 'lock' && locking.value) return;
+  if (action === 'lock') locking.value = true;
   try {
     await bridge.widgetAction(action);
   } catch (error) {
     app.fail(error);
+  } finally {
+    if (action === 'lock') locking.value = false;
   }
 }
 function drag(event: MouseEvent) {
@@ -298,15 +303,27 @@ function resize(event: MouseEvent) {
           >×</AppButton
         >
       </div>
-      <AppButton
-        variant="ghost"
-        class="widget-expand"
-        :aria-expanded="expanded"
-        aria-controls="widget-task-panel"
-        :disabled="store.busy"
-        @click="expanded = !expanded"
-        >{{ expanded ? '收起' : '展开' }}</AppButton
-      >
+      <div class="widget-header-controls">
+        <AppButton
+          variant="ghost"
+          class="widget-lock"
+          aria-label="锁定悬浮窗"
+          title="锁定后鼠标穿透，右键系统托盘可解锁"
+          :aria-pressed="app.desktop.widgetLocked"
+          :disabled="locking || store.busy || app.busy"
+          @click="windowAction('lock')"
+          ><AppIcon name="lock" :size="13"
+        /></AppButton>
+        <AppButton
+          variant="ghost"
+          class="widget-expand"
+          :aria-expanded="expanded"
+          aria-controls="widget-task-panel"
+          :disabled="store.busy"
+          @click="expanded = !expanded"
+          >{{ expanded ? '收起' : '展开' }}</AppButton
+        >
+      </div>
     </header>
     <div class="widget-tabs" role="tablist" aria-label="悬浮任务范围" @keydown="switchTab">
       <button

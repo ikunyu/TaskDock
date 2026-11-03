@@ -122,7 +122,7 @@ fn desktop_persistence_revision_conflicts_and_validation_preserve_tasks() {
         db.save_desktop(changed.clone(), initial.revision),
         Err(ServiceError::Conflict)
     ));
-    changed.widget_opacity = 20;
+    changed.widget_opacity = 19;
     assert!(db.save_desktop(changed, result.revision).is_err());
     assert_eq!(db.settings().unwrap().revision, result.revision);
     assert_eq!(db.task_snapshot().unwrap().revision, task.snapshot.revision);
@@ -139,7 +139,10 @@ fn invalid_preferences_and_positions_cannot_enter_database() {
     let db = Database::open(&dir.path().join("desktop.sqlite3")).unwrap();
     let c = db.connection.lock().unwrap();
     assert!(c
-        .execute("UPDATE desktop_settings SET widget_opacity=59", [])
+        .execute("UPDATE desktop_settings SET widget_opacity=19", [])
+        .is_err());
+    assert!(c
+        .execute("UPDATE desktop_settings SET widget_locked=2", [])
         .is_err());
     assert!(c
         .execute("UPDATE desktop_settings SET close_behavior='invalid'", [])
@@ -300,4 +303,33 @@ fn visibility_changes_only_its_field_and_no_op_preserves_revision() {
         Database::open(&path).unwrap().settings().unwrap().desktop,
         expected
     );
+}
+
+#[test]
+fn lock_and_twenty_percent_opacity_persist_without_touching_tasks() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("locked.sqlite3");
+    let db = Database::open(&path).unwrap();
+    let before = db.settings().unwrap();
+    let mut prefs = before.desktop;
+    prefs.widget_opacity = 20;
+    let saved = db.save_desktop(prefs, before.revision).unwrap();
+    let task_revision = db.task_snapshot().unwrap().revision;
+    let locked = db.set_widget_locked(true).unwrap();
+    assert!(locked.desktop.widget_locked);
+    assert_eq!(locked.desktop.widget_opacity, 20);
+    assert_eq!(locked.revision, saved.revision + 1);
+    assert_eq!(
+        db.set_widget_locked(true).unwrap().revision,
+        locked.revision
+    );
+    assert_eq!(db.task_snapshot().unwrap().revision, task_revision);
+    drop(db);
+    let db = Database::open(&path).unwrap();
+    let reopened = db.settings().unwrap();
+    assert_eq!(reopened.desktop, locked.desktop);
+    assert_eq!(reopened.revision, locked.revision);
+    let unlocked = db.set_widget_locked(false).unwrap();
+    assert!(!unlocked.desktop.widget_locked);
+    assert_eq!(unlocked.desktop.widget_opacity, 20);
 }

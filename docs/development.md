@@ -2,7 +2,7 @@
 
 ## 当前版本约定
 
-当前应用版本为 TaskDock 1.1.0，数据库目标为 Schema 7。未经维护者明确要求，不自动递增应用展示版本。GitHub 更新使用独立递增的内部 build 和旧客户端兼容协议，见 [GitHub 更新说明](github-updates.md)。依赖版本和数据库 Schema 按各自的兼容性需求管理，不随应用展示版本改写。
+当前应用版本为 TaskDock 1.1.1，数据库目标为 Schema 8。未经维护者明确要求，不自动递增应用展示版本。GitHub 更新使用独立递增的内部 build 和旧客户端兼容协议，见 [GitHub 更新说明](github-updates.md)。依赖版本和数据库 Schema 按各自的兼容性需求管理，不随应用展示版本改写。
 
 源码仓库为 [ikunyu/TaskDock](https://github.com/ikunyu/TaskDock)，采用功能分支与 Pull Request 协作。克隆、环境准备、提交约束及发布分工见 [贡献与协作指南](../CONTRIBUTING.md)。下文各阶段条目记录当时的实现与验收范围，当前约定以本节及现有源码为准。
 

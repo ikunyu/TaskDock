@@ -17,7 +17,7 @@ import {
 
 export const nativeMode = isTauri();
 let preview: BootstrapSnapshot = {
-  appVersion: '1.1.0',
+  appVersion: '1.1.1',
   schemaVersion: 0,
   desktop: defaultDesktopSettings(),
   theme: 'system',
@@ -54,11 +54,13 @@ export const bridge = {
     nativeMode
       ? invoke('exit_app')
       : Promise.reject({ code: 'DESKTOP_REQUIRED', message: '此操作需要 Windows 桌面版。' }),
-  widgetAction: (action: 'drag' | 'resize' | 'hide'): Promise<void> =>
+  widgetAction: (action: 'drag' | 'resize' | 'hide' | 'lock'): Promise<void> =>
     nativeMode
       ? action === 'hide'
         ? invoke('hide_current_window')
-        : invoke('widget_window_action', { action })
+        : action === 'lock'
+          ? invoke('lock_widget')
+          : invoke('widget_window_action', { action })
       : Promise.reject({ code: 'DESKTOP_REQUIRED', message: '此操作需要 Windows 桌面版。' }),
   widgetLayout: (expanded: boolean, width: number, height: number): Promise<void> =>
     nativeMode ? invoke('set_widget_layout', { expanded, width, height }) : Promise.resolve(),

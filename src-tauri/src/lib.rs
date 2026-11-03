@@ -115,6 +115,7 @@ pub fn run() {
             desktop::reset_window_positions,
             desktop::exit_app,
             desktop::widget_window_action,
+            desktop::lock_widget,
             desktop::set_widget_layout
         ])
         .build(tauri::generate_context!());

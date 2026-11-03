@@ -82,6 +82,23 @@ html[data-window='widget'] #app {
   min-height: 26px;
   padding: 3px 6px;
 }
+.widget-header-controls {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.widget-header .widget-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 2px;
+}
 .widget-header button {
   cursor: pointer;
 }

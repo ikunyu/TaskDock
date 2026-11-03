@@ -17,6 +17,8 @@ pub struct DesktopSettings {
     pub widget_week_font_size: u8,
     pub widget_week_date_font_size: u8,
     pub widget_topmost: bool,
+    #[serde(default)]
+    pub widget_locked: bool,
     pub widget_visible: bool,
     pub shortcut: String,
     pub autostart: bool,
@@ -32,6 +34,7 @@ impl Default for DesktopSettings {
             widget_week_font_size: 15,
             widget_week_date_font_size: 10,
             widget_topmost: false,
+            widget_locked: false,
             widget_visible: false,
             shortcut: "Ctrl+Alt+T".into(),
             autostart: false,
@@ -58,7 +61,7 @@ impl DesktopSettings {
         if !(8..=18).contains(&self.widget_week_date_font_size) {
             return Err(ServiceError::Validation("周日期范围字号需为 8–18。"));
         }
-        if !(60..=100).contains(&self.widget_opacity)
+        if !(20..=100).contains(&self.widget_opacity)
             || !matches!(self.close_behavior.as_str(), "hide" | "exit")
         {
             return Err(ServiceError::Validation("窗口设置无效。"));
@@ -152,7 +155,7 @@ impl Database {
         let mut c = self.connection.lock().map_err(|_| ServiceError::Lock)?;
         let tx = c.transaction_with_behavior(TransactionBehavior::Immediate)?;
         if tx.execute("UPDATE app_settings SET revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=1 AND revision=?1",[expected])?!=1{return Err(ServiceError::Conflict);}
-        tx.execute("UPDATE desktop_settings SET widget_opacity=?1,widget_topmost=?2,widget_visible=?3,shortcut=?4,autostart=?5,close_behavior=?6,widget_font_size=?7,widget_compact_font_size=?8,widget_date_font_size=?9,widget_week_font_size=?10,widget_week_date_font_size=?11 WHERE id=1",params![settings.widget_opacity,settings.widget_topmost,settings.widget_visible,settings.shortcut,settings.autostart,settings.close_behavior,settings.widget_font_size,settings.widget_compact_font_size,settings.widget_date_font_size,settings.widget_week_font_size,settings.widget_week_date_font_size])?;
+        tx.execute("UPDATE desktop_settings SET widget_opacity=?1,widget_topmost=?2,widget_visible=?3,shortcut=?4,autostart=?5,close_behavior=?6,widget_font_size=?7,widget_compact_font_size=?8,widget_date_font_size=?9,widget_week_font_size=?10,widget_week_date_font_size=?11,widget_locked=?12 WHERE id=1",params![settings.widget_opacity,settings.widget_topmost,settings.widget_visible,settings.shortcut,settings.autostart,settings.close_behavior,settings.widget_font_size,settings.widget_compact_font_size,settings.widget_date_font_size,settings.widget_week_font_size,settings.widget_week_date_font_size,settings.widget_locked])?;
         let result = crate::db::read_settings(&tx)?;
         tx.commit()?;
         Ok(result)
@@ -169,6 +172,27 @@ impl Database {
             tx.execute(
                 "UPDATE desktop_settings SET widget_visible=?1 WHERE id=1",
                 [visible],
+            )?;
+            if tx.execute("UPDATE app_settings SET revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=1", [])? != 1 {
+                return Err(ServiceError::InvalidSettings);
+            }
+        }
+        let result = crate::db::read_settings(&tx)?;
+        tx.commit()?;
+        Ok(result)
+    }
+    pub fn set_widget_locked(&self, locked: bool) -> Result<SettingsSnapshot, ServiceError> {
+        let mut c = self.connection.lock().map_err(|_| ServiceError::Lock)?;
+        let tx = c.transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let current: bool = tx.query_row(
+            "SELECT widget_locked FROM desktop_settings WHERE id=1",
+            [],
+            |r| r.get(0),
+        )?;
+        if current != locked {
+            tx.execute(
+                "UPDATE desktop_settings SET widget_locked=?1 WHERE id=1",
+                [locked],
             )?;
             if tx.execute("UPDATE app_settings SET revision=revision+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=1", [])? != 1 {
                 return Err(ServiceError::InvalidSettings);
@@ -211,7 +235,7 @@ impl Database {
     }
 }
 pub fn read_desktop(c: &rusqlite::Connection) -> Result<DesktopSettings, ServiceError> {
-    let raw=c.query_row("SELECT widget_opacity,widget_topmost,widget_visible,shortcut,autostart,close_behavior,widget_font_size,widget_compact_font_size,widget_date_font_size,widget_week_font_size,widget_week_date_font_size FROM desktop_settings WHERE id=1",[],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,i64>(1)?,r.get::<_,i64>(2)?,r.get::<_,String>(3)?,r.get::<_,i64>(4)?,r.get::<_,String>(5)?,r.get::<_,i64>(6)?,r.get::<_,i64>(7)?,r.get::<_,i64>(8)?,r.get::<_,i64>(9)?,r.get::<_,i64>(10)?)))?;
+    let raw=c.query_row("SELECT widget_opacity,widget_topmost,widget_visible,shortcut,autostart,close_behavior,widget_font_size,widget_compact_font_size,widget_date_font_size,widget_week_font_size,widget_week_date_font_size,widget_locked FROM desktop_settings WHERE id=1",[],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,i64>(1)?,r.get::<_,i64>(2)?,r.get::<_,String>(3)?,r.get::<_,i64>(4)?,r.get::<_,String>(5)?,r.get::<_,i64>(6)?,r.get::<_,i64>(7)?,r.get::<_,i64>(8)?,r.get::<_,i64>(9)?,r.get::<_,i64>(10)?,r.get::<_,i64>(11)?)))?;
     let mut value = DesktopSettings {
         widget_opacity: u8::try_from(raw.0).unwrap_or(0),
         widget_topmost: raw.1 == 1,
@@ -224,8 +248,13 @@ pub fn read_desktop(c: &rusqlite::Connection) -> Result<DesktopSettings, Service
         widget_date_font_size: u8::try_from(raw.8).unwrap_or(10),
         widget_week_font_size: u8::try_from(raw.9).unwrap_or(15),
         widget_week_date_font_size: u8::try_from(raw.10).unwrap_or(10),
+        widget_locked: raw.11 == 1,
     };
-    if ![raw.1, raw.2, raw.4].iter().all(|v| [0, 1].contains(v)) || value.validate().is_err() {
+    if ![raw.1, raw.2, raw.4, raw.11]
+        .iter()
+        .all(|v| [0, 1].contains(v))
+        || value.validate().is_err()
+    {
         log::warn!("invalid desktop configuration; safe defaults used");
         value = Default::default();
     }

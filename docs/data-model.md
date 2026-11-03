@@ -4,7 +4,7 @@
 
 当前操作历史浏览功能已移除：不再提供全局/单任务历史页面、查询 IPC 或相关权限。既有 task_history 表、事务审计写入及备份/恢复/JSON 导出兼容保留，不修改迁移或删除用户记录。
 
-当前 UI 将无 planned_date 的记录展示为心愿，有日期的记录为正式任务；心愿已完成后仍保留在心愿单，不进入有日期任务的完成视图。当前 Schema 7；旧任务记录和已应用迁移不修改，旧无日期记录的截止/提醒配置保留。详见 [任务与心愿单](task-workspace.md)。
+当前 UI 将无 planned_date 的记录展示为心愿，有日期的记录为正式任务；心愿已完成后仍保留在心愿单，不进入有日期任务的完成视图。当前 Schema 8；旧任务记录和已应用迁移不修改，旧无日期记录的截止/提醒配置保留。详见 [任务与心愿单](task-workspace.md)。
 
 1.0.0 的彻底删除不增加 Schema：在同一事务内移除任务的 reminders、task_schedule、subtasks、task_history 以及 tasks 行；重复系列 exclusions_json 保留实例日期，提醒去重账本及已有备份保留。普通删除继续使用 deleted_at。详见 [彻底删除说明](permanent-delete.md)。
 
@@ -105,6 +105,10 @@ Schema目标继续为5，本阶段未修改任何既有迁移，未打开或升�
 ## Schema 7：独立字号
 
 0007_widget_font_controls.sql新增widget_compact_font_size（10–24、默认14）、widget_date_font_size（8–18、默认10）、widget_week_font_size（10–26、默认15）、widget_week_date_font_size（8–18、默认10）；保留widget_font_size作为展开任务字号（10–20、默认13）。迁移从旧字号推导日期和周标题，收起任务至少14。备份目录复制保留全部记录，扩展Schema约束至7；字号与设置revision仍在同一事务保存。0001–0006未修改。开发下行脚本存在Schema7备份记录时拒绝执行，须显式事务回滚，无生产下行IPC。本轮没有访问真实数据库。
+
+## Schema 8：悬浮窗锁定与不透明度
+
+0008_widget_lock.sql在迁移事务中复制替换desktop_settings，完整保留所有旧偏好，将widget_opacity约束扩展为20–100，新增widget_locked布尔字段（0/1，默认0）。backup_records完整复制到允许Schema1–8的表，保留既有备份记录。锁定、解锁和完整设置保存沿用app_settings.revision，不修改任务revision。旧迁移0001–0007不变。下行脚本在锁定开启、不透明度低于60或有Schema8备份记录时拒绝执行，不静默丢失新设置。
 
 ## 定期提醒JSON扩展（Schema仍为7）
 

@@ -40,10 +40,10 @@ async function save() {
   notice.value = '';
   if (
     !Number.isInteger(draft.widgetOpacity) ||
-    draft.widgetOpacity < 60 ||
+    draft.widgetOpacity < 20 ||
     draft.widgetOpacity > 100
   ) {
-    error.value = '透明度需为 60–100。';
+    error.value = '不透明度需为 20–100。';
     return;
   }
   for (const font of widgetFontOptions) {
@@ -131,7 +131,7 @@ onUnmounted(() => {
             >悬浮窗不透明度 {{ draft.widgetOpacity }}%<input
               v-model.number="draft.widgetOpacity"
               type="range"
-              min="60"
+              min="20"
               max="100"
               step="1"
               :disabled="app.busy || dataBusy"
@@ -157,6 +157,14 @@ onUnmounted(() => {
               :disabled="app.busy || dataBusy"
             />悬浮窗置顶</label
           >
+          <label class="setting-check"
+            ><input
+              v-model="draft.widgetLocked"
+              type="checkbox"
+              :disabled="app.busy || dataBusy"
+            />锁定悬浮窗（鼠标穿透）</label
+          >
+          <p class="muted small">锁定后可右键系统托盘，选择“解锁悬浮窗”。</p>
           <label class="setting-check"
             ><input
               v-model="draft.widgetVisible"

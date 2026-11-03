@@ -20,6 +20,13 @@ beforeEach(() => {
 });
 afterEach(() => wrapper.unmount());
 describe('widget native interaction boundaries', () => {
+  it('locks through its explicit button without starting a drag', async () => {
+    const lock = wrapper.get('button[aria-label="锁定悬浮窗"]');
+    lock.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+    expect(api.widgetAction).not.toHaveBeenCalled();
+    await lock.trigger('click');
+    expect(api.widgetAction).toHaveBeenCalledWith('lock');
+  });
   it('starts a drag only from its header surface', async () => {
     wrapper
       .get('.mini-brand')

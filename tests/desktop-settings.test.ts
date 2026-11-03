@@ -108,7 +108,7 @@ describe('desktop settings interactions', () => {
     await wrapper.get('form').trigger('submit');
     await flushPromises();
     expect(api.saveDesktop).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('60–100');
+    expect(wrapper.text()).toContain('20–100');
   });
   it('routes reset and explicit exit through bounded commands', async () => {
     await flushPromises();

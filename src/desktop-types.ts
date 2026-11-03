@@ -6,6 +6,7 @@ export interface DesktopSettings {
   widgetWeekFontSize: number;
   widgetWeekDateFontSize: number;
   widgetTopmost: boolean;
+  widgetLocked: boolean;
   widgetVisible: boolean;
   shortcut: string;
   autostart: boolean;
@@ -25,6 +26,7 @@ export const defaultDesktopSettings = (): DesktopSettings => ({
   widgetWeekFontSize: 15,
   widgetWeekDateFontSize: 10,
   widgetTopmost: false,
+  widgetLocked: false,
   widgetVisible: false,
   shortcut: 'Ctrl+Alt+T',
   autostart: false,

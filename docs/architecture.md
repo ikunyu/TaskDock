@@ -86,7 +86,9 @@ single-instance 最先注册，第二次启动只激活已有 main；三个预�
 
 ShortcutLease 先注册候选，数据库提交后切换 effectiveShortcut 并移除旧键，失败释放候选。事件只接受当前有效键，旧注册清理失败也不能触发业务。使用 OS 热键注册，无键盘钩子/键盘记录。OS 与 SQLite 不能跨系统原子提交，因此操作序列化、检查 expectedRevision、失败补偿并显示实际状态，不能假装保存成功。
 
-Windows 透明度仅修改本进程 widget HWND 的 layered alpha（60–100%），置顶使用 Tauri API。保存物理 x/y、逻辑内容 width/height 和当时 scale；恢复使用当前 Monitor::work_area 和当前 scale，负坐标合法、离屏回退主屏。--background 不弹主窗口，按保存偏好决定 widget 可见性；应用启动本身不修改系统启动项。
+Windows 透明度仅修改本进程 widget HWND 的 layered alpha（20–100%），置顶使用 Tauri API。保存物理 x/y、逻辑内容 width/height 和当时 scale；恢复使用当前 Monitor::work_area 和当前 scale，负坐标合法、离屏回退主屏。--background 不弹主窗口，按保存偏好决定 widget 可见性；应用启动本身不修改系统启动项。
+
+1.1.1新增悬浮窗锁定：Rust按序调用Tauri set_ignore_cursor_events和set_focusable，最后应用layered alpha；相关操作在UI线程执行并向后台工作线程返回结果。拖动和缩放命令仍同步处理。锁定状态写入Schema8的desktop_settings.widget_locked，使用同一服务与设置revision事件；锁定后整体穿透，托盘或主窗口设置提供独立解锁入口。失败补偿原生样式，窗口显隐、布局与恢复后重新应用样式。详见[锁定说明](widget-lock.md)。
 
 ## 第四阶段：提醒与重复（源码0.4.0）
 

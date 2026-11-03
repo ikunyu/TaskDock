@@ -76,6 +76,15 @@ pub fn widget_window_action(window: WebviewWindow, action: WidgetAction) -> Resu
             .map_err(AppError::internal),
     }
 }
+#[tauri::command]
+pub async fn lock_widget(app: AppHandle, window: WebviewWindow) -> Result<(), AppError> {
+    if window.label() != "widget" {
+        return Err(AppError::forbidden());
+    }
+    tauri::async_runtime::spawn_blocking(move || runtime::set_widget_locked(&app, true))
+        .await
+        .map_err(AppError::internal)?
+}
 pub fn show_widget(app: &AppHandle) -> Result<(), AppError> {
     runtime::visibility(app, true)?;
     runtime::present(app, "widget")

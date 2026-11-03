@@ -31,6 +31,7 @@ fn main() {
             "reset_window_positions",
             "exit_app",
             "widget_window_action",
+            "lock_widget",
             "set_widget_layout",
             "bootstrap",
             "update_status",

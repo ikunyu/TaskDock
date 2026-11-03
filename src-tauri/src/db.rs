@@ -3,7 +3,7 @@ use rusqlite::{params, Connection, TransactionBehavior};
 use serde::{Deserialize, Serialize};
 use std::{path::Path, sync::Mutex, time::Duration};
 
-pub const SCHEMA_VERSION: u32 = 7;
+pub const SCHEMA_VERSION: u32 = 8;
 struct Migration {
     version: u32,
     name: &'static str,
@@ -44,6 +44,11 @@ const MIGRATIONS: &[Migration] = &[
         version: 7,
         name: "widget_font_controls",
         sql: include_str!("../migrations/0007_widget_font_controls.sql"),
+    },
+    Migration {
+        version: 8,
+        name: "widget_lock",
+        sql: include_str!("../migrations/0008_widget_lock.sql"),
     },
 ];
 
