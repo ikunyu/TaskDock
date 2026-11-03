@@ -1,0 +1,24 @@
+[[permission]]
+identifier = "tasks-read"
+description = "Read a versioned task snapshot without SQL or file access"
+commands.allow = ["tasks_snapshot"]
+
+[[permission]]
+identifier = "tasks-create"
+description = "Create a validated task; callers restricted in Rust"
+commands.allow = ["create_task"]
+
+[[permission]]
+identifier = "tasks-status"
+description = "Complete or reopen a task with expected version and confirmation"
+commands.allow = ["set_task_status"]
+
+[[permission]]
+identifier = "tasks-edit"
+description = "Main-window aggregate editing, confirmed permanent deletion and category management"
+commands.allow = ["update_task", "save_category", "delete_category", "purge_task"]
+
+[[permission]]
+identifier = "schedule-edit"
+description = "Main-window reminder actions and notification task navigation"
+commands.allow = ["reminder_action", "take_notification_task"]

@@ -1,0 +1,40 @@
+{
+  "name": "taskdock",
+  "private": true,
+  "version": "1.1.0",
+  "description": "TaskDock Windows 本地桌面待办工具",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "typecheck": "vue-tsc --noEmit",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "tauri": "tauri",
+    "package:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-WindowsRelease.ps1 -NextBuild",
+    "package:windows:raw": "tauri build --bundles nsis"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.12.4",
+    "pinia": "4.1.0",
+    "vue": "3.5.44"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4",
+    "@types/node": "^24.0.0",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "jsdom": "^30.1.3",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5",
+    "vue-tsc": "3.3.13"
+  }
+}

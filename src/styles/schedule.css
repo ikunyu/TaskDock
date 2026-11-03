@@ -1,0 +1,55 @@
+.schedule-editor {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+.schedule-editor legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+.schedule-options {
+  display: flex;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.schedule-check {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.schedule-check input {
+  width: auto;
+}
+.reminder-center {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0 20px;
+  max-height: 360px;
+  overflow: auto;
+}
+.reminder-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.reminder-presets button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.reminder-presets button[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-hide-current-window"
+description = "Enables the hide_current_window command without any pre-configured scope."
+commands.allow = ["hide_current_window"]
+
+[[permission]]
+identifier = "deny-hide-current-window"
+description = "Denies the hide_current_window command without any pre-configured scope."
+commands.deny = ["hide_current_window"]

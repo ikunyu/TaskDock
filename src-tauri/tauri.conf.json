@@ -1,0 +1,105 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "TaskDock",
+  "version": "1.1.0",
+  "identifier": "com.taskdock.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "create": false,
+        "title": "TaskDock",
+        "width": 1120,
+        "height": 780,
+        "minWidth": 760,
+        "minHeight": 600,
+        "center": true,
+        "visible": false,
+        "backgroundColor": "#fafafc"
+      },
+      {
+        "label": "widget",
+        "create": false,
+        "skipTaskbar": true,
+        "title": "TaskDock · 悬浮任务",
+        "width": 180,
+        "height": 240,
+        "minWidth": 160,
+        "minHeight": 120,
+        "center": true,
+        "visible": false,
+        "resizable": true,
+        "maximizable": false,
+        "backgroundColor": "#fafafc",
+        "maxWidth": 600,
+        "maxHeight": 800,
+        "decorations": false
+      },
+      {
+        "label": "quick-entry",
+        "create": false,
+        "title": "TaskDock · 快速输入",
+        "width": 560,
+        "height": 340,
+        "minWidth": 420,
+        "minHeight": 320,
+        "center": true,
+        "visible": false,
+        "resizable": true,
+        "maximizable": false,
+        "backgroundColor": "#fafafc"
+      }
+    ],
+    "security": {
+      "capabilities": ["shared", "main", "widget", "quick-entry"],
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'",
+      "devCsp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost http://127.0.0.1:1420 ws://127.0.0.1:1420; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "shortDescription": "TaskDock 本地桌面待办工具",
+    "publisher": "TaskDock",
+    "category": "Productivity",
+    "longDescription": "任务、提醒、重复计划、桌面悬浮窗与本地数据保护。",
+    "windows": {
+      "allowDowngrades": true,
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": false,
+        "compression": "lzma",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "headerImage": "icons/installer-header.bmp",
+        "sidebarImage": "icons/installer-sidebar.bmp",
+        "installerHooks": "installer/hooks.nsh",
+        "startMenuFolder": "TaskDock"
+      }
+    },
+    "useLocalToolsDir": true,
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://github.com/ikunyu/TaskDock/releases/latest/download/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhDMzAzODg4OEIzQzVDMkIKUldRclhEeUxpRGd3ak5IMmJMTjNzY1NCellyL3FRUkJHRG84cDJ6RWlrVXBpM2loUWh5NjBFUncK",
+      "requireSignedVersion": true,
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "widget",
+  "description": "Widget may show quick entry and hide itself; Rust additionally validates targets",
+  "local": true,
+  "windows": ["widget"],
+  "permissions": ["foundation-show", "foundation-hide", "tasks-status", "desktop-widget"]
+}

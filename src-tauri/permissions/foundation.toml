@@ -1,0 +1,24 @@
+[[permission]]
+identifier = "foundation-read"
+description = "Read the versioned local settings snapshot"
+commands.allow = ["bootstrap"]
+
+[[permission]]
+identifier = "foundation-theme"
+description = "Update only the validated theme preference"
+commands.allow = ["set_theme"]
+
+[[permission]]
+identifier = "foundation-show"
+description = "Show a predefined child window, with caller/target checks in Rust"
+commands.allow = ["show_window"]
+
+[[permission]]
+identifier = "foundation-hide"
+description = "Hide the calling child window only"
+commands.allow = ["hide_current_window"]
+
+[[permission]]
+identifier = "foundation-report"
+description = "Log a frontend error code from a fixed allowlist"
+commands.allow = ["report_frontend_error"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-data-status"
+description = "Enables the data_status command without any pre-configured scope."
+commands.allow = ["data_status"]
+
+[[permission]]
+identifier = "deny-data-status"
+description = "Denies the data_status command without any pre-configured scope."
+commands.deny = ["data_status"]

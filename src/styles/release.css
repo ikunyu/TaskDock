@@ -1,0 +1,232 @@
+/* Shared finishing rules; all surfaces use the existing theme tokens. */
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+.settings-tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--muted);
+}
+.settings-tabs button[aria-selected='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--border);
+}
+.settings-page {
+  min-width: 0;
+}
+.content-body.week-content {
+  padding-top: 20px;
+  padding-bottom: 16px;
+}
+.settings-page > h3 {
+  margin: 0 0 14px;
+}
+.settings-page .data-management {
+  border-top: 0;
+  padding-top: 0;
+}
+.settings-page .desktop-runtime {
+  display: grid;
+  gap: 10px;
+}
+.desktop-settings {
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+.dialog-panel {
+  scrollbar-gutter: stable;
+}
+.dialog-heading {
+  position: sticky;
+  top: -22px;
+  z-index: 1;
+  background: var(--surface);
+  padding: 12px 0;
+  margin-top: -12px;
+}
+.dialog-backdrop .detail-drawer {
+  min-width: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.dialog-actions,
+.quick-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.dialog-actions .app-button {
+  max-width: 100%;
+  white-space: normal;
+}
+.section-heading {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.section-heading > * {
+  min-width: 0;
+}
+.data-view input,
+.data-view select,
+.task-form input:not([type='checkbox']),
+.task-form select,
+.task-form textarea {
+  max-width: 100%;
+}
+.task-title-button,
+.task-title {
+  overflow-wrap: anywhere;
+}
+.sidebar .nav-item {
+  flex-shrink: 0;
+}
+.sidebar .nav-item[aria-current='page'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.sidebar .brand {
+  margin-bottom: 20px;
+}
+.sidebar .workspace-label {
+  flex-shrink: 0;
+}
+.window-widget .widget-header {
+  min-height: 28px;
+  touch-action: none;
+}
+.window-widget .mini-brand {
+  white-space: nowrap;
+}
+.window-widget .widget-header-actions {
+  flex-shrink: 0;
+}
+.window-widget .widget-summary,
+.window-widget .widget-add {
+  flex-shrink: 0;
+}
+.window-widget .widget-resize {
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+  touch-action: none;
+}
+.window-widget .widget-footer {
+  padding-right: 20px;
+}
+.window-widget .form-error,
+.window-widget .error-banner {
+  flex-shrink: 0;
+  max-height: 88px;
+  overflow: auto;
+}
+.quick-layout .quick-options select {
+  max-width: 210px;
+}
+.quick-layout .quick-options label {
+  min-width: 0;
+}
+.calendar-cell {
+  overflow: hidden;
+}
+.calendar-toolbar > label {
+  min-width: 0;
+}
+@media (max-width: 850px) {
+  .content-body {
+    padding: 24px 22px;
+  }
+  .sidebar {
+    width: 200px;
+  }
+  .calendar-cell {
+    min-height: 96px;
+  }
+  .form-grid {
+    gap: 10px;
+  }
+}
+@media (max-width: 650px) {
+  .sidebar-navigation > .nav-extra {
+    display: flex;
+  }
+  .sidebar-navigation > .nav-extra {
+    min-height: 34px;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .calendar-cell {
+    min-height: 88px;
+  }
+  .calendar-cell .overdue-badge {
+    font-size: 9px;
+    padding: 1px;
+  }
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 300px) {
+  .window-widget .widget-date {
+    display: none;
+  }
+  .window-widget .widget-caption {
+    font-size: 11px;
+  }
+  .window-widget .mini-brand {
+    font-size: 13px;
+  }
+  .window-widget .widget-header {
+    gap: 4px;
+  }
+}
+
+.update-notice,
+.update-panel {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.update-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px 10px;
+}
+.update-panel {
+  margin: 10px 0;
+  display: grid;
+  gap: 8px;
+}
+.update-panel p {
+  margin: 0;
+}
+.update-notes {
+  white-space: pre-line;
+  max-height: 110px;
+  overflow: auto;
+  font-size: 12px;
+}
+.update-installing {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--surface);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+}

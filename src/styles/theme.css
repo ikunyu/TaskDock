@@ -1,0 +1,224 @@
+:root {
+  font-family: 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --accent: #6558d4;
+  --accent-hover: #5547c2;
+  --accent-soft: #eeeafa;
+  --canvas: #fafafc;
+  --surface: #fff;
+  --sidebar: #f3f3f8;
+  --text: #262736;
+  --muted: #767787;
+  --border: #e8e8ef;
+  --success: #448b70;
+  --error-bg: #fff0ef;
+  --error-text: #ad3432;
+  --shadow: 0 12px 50px #22223a14;
+  color-scheme: light;
+  color: var(--text);
+  background: var(--canvas);
+  font-size: 14px;
+}
+:root[data-theme='dark'] {
+  --accent: #b4a5ff;
+  --accent-hover: #c5baff;
+  --accent-soft: #302a48;
+  --canvas: #1a1b22;
+  --surface: #21222c;
+  --sidebar: #17181f;
+  --text: #ececf4;
+  --muted: #a0a1b4;
+  --border: #343541;
+  --success: #82c9aa;
+  --error-bg: #472727;
+  --error-text: #ffb8b3;
+  --shadow: 0 12px 50px #0005;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+button,
+input,
+select {
+  outline: none;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+button {
+  color: inherit;
+}
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  font-weight: 650;
+}
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+svg {
+  flex-shrink: 0;
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 12px;
+}
+.eyebrow {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 13px;
+  white-space: nowrap;
+  min-height: 36px;
+  transition: background 0.15s;
+}
+.app-button:hover:not(:disabled) {
+  background: var(--sidebar);
+}
+.button-primary {
+  background: var(--accent);
+  color: var(--surface);
+  border-color: transparent;
+}
+:root[data-theme='dark'] .button-primary {
+  color: #201a38;
+}
+.button-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.button-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+.button-danger {
+  color: var(--error-text);
+  background: var(--error-bg);
+  border-color: var(--error-text);
+}
+.button-danger:hover:not(:disabled) {
+  background: var(--error-bg);
+  box-shadow: inset 0 0 0 1px var(--error-text);
+}
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: #6558d4;
+  color: white;
+  font-size: 25px;
+  line-height: 1;
+  border-radius: 11px;
+  box-shadow: 0 3px 8px #6558d425;
+}
+.brand-mark.tiny {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  font-size: 17px;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.phase-badge > span,
+.status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+}
+.preview-banner {
+  padding: 5px 10px;
+  text-align: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+}
+.error-banner {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+.error-banner small {
+  opacity: 0.8;
+}
+.loading-state {
+  min-height: 280px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding: 30px;
+  text-align: center;
+}
+.loading-state p {
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

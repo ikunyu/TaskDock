@@ -1,0 +1,302 @@
+html[data-window='widget'],
+html[data-window='widget'] body,
+html[data-window='widget'] #app {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.application.window-widget {
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+.desktop-settings {
+  max-height: 72vh;
+  overflow: auto;
+  padding-right: 5px;
+}
+.desktop-settings form {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+.desktop-settings form > label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+.desktop-settings input:not([type='checkbox']):not([type='range']),
+.desktop-settings select {
+  width: 100%;
+  min-height: 36px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 10px;
+}
+.desktop-settings .setting-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.desktop-settings input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.desktop-runtime {
+  padding-top: 15px;
+}
+.window-widget .widget-layout {
+  position: relative;
+  padding: 6px 5px 5px;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+.widget-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+}
+.widget-header .mini-brand {
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.widget-header .widget-header-actions {
+  justify-self: end;
+  min-width: 0;
+  overflow: hidden;
+}
+.widget-expand {
+  grid-column: 3;
+  justify-self: end;
+  flex-shrink: 0;
+  min-width: 36px;
+  min-height: 26px;
+  padding: 3px 6px;
+}
+.widget-header button {
+  cursor: pointer;
+}
+.widget-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 2px;
+  margin: 4px 0;
+  border-radius: 8px;
+  background: var(--sidebar);
+}
+.widget-tabs button {
+  flex: 1;
+  min-width: 0;
+  min-height: 24px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+.widget-tabs button[aria-selected='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+.widget-week-group {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 4px;
+}
+.widget-week-group + .widget-week-group {
+  margin-top: 6px;
+}
+.widget-week-group > h2 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 2px 0 3px;
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.widget-week-period {
+  font-size: var(--widget-week-font, 15px);
+  font-weight: 650;
+}
+.widget-week-dates {
+  color: var(--muted);
+  font-size: var(--widget-week-date-font, 10px);
+}
+.window-widget .task-compact {
+  padding: 4px 0;
+  gap: 6px;
+}
+.window-widget .task-compact .task-title {
+  font-size: var(--widget-compact-font, 14px);
+  line-height: 1.5;
+}
+.window-widget .task-compact.task-inline-date {
+  align-items: center;
+}
+.task-inline-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.window-widget .task-compact.task-inline-date .task-title {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--widget-task-font, 13px);
+  font-weight: 500;
+}
+.task-inline-time {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: var(--widget-date-font, 10px);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.window-widget .widget-layout.widget-collapsed {
+  padding: 3px 5px;
+}
+.window-widget .widget-collapsed .widget-header {
+  min-height: 24px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
+}
+.widget-collapsed .widget-expand {
+  min-height: 22px;
+  padding: 0 3px;
+  font-size: 10px;
+}
+.widget-collapsed .mini-brand {
+  font-size: 11px;
+}
+.widget-collapsed .task-compact {
+  min-height: 20px;
+  height: auto;
+  padding: 1px 0;
+  align-items: center;
+  border-bottom: 0;
+}
+.widget-collapsed .task-compact:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+.widget-collapsed .task-title {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: var(--widget-compact-font, 14px);
+  line-height: max(20px, 1.8em);
+}
+.widget-collapsed .widget-scroll {
+  margin: 2px 0 0;
+  scrollbar-gutter: stable;
+}
+.widget-content {
+  width: 100%;
+  min-width: 0;
+}
+.widget-text-probe {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: pre;
+  width: max-content;
+  max-width: none;
+  font-size: 12px;
+  line-height: 20px;
+}
+.widget-empty-simple {
+  margin: 0;
+  line-height: 22px;
+}
+.widget-resize {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  border: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 65%,
+    var(--muted) 66%,
+    transparent 72%,
+    var(--muted) 73%,
+    transparent 80%
+  );
+}
+.window-widget .widget-scroll {
+  min-height: 0;
+}
+.window-widget .widget-summary {
+  padding-bottom: 6px;
+}
+.window-widget .widget-progress {
+  margin-top: 4px;
+}
+.window-widget .widget-add {
+  min-height: 30px;
+  padding: 5px 8px;
+}
+.window-widget .widget-caption {
+  margin: 8px 0 12px;
+}
+@media (max-height: 320px) {
+  .window-widget .widget-caption,
+  .window-widget .widget-footer {
+    display: none;
+  }
+  .window-widget .widget-summary {
+    padding: 6px 0;
+  }
+  .window-widget .widget-add {
+    margin-top: 5px;
+    min-height: 30px;
+  }
+  .window-widget .empty-state.compact {
+    padding: 8px;
+  }
+  .window-widget .empty-state.compact .empty-icon {
+    display: none;
+  }
+}
+
+.desktop-settings .theme-select label {
+  white-space: nowrap;
+}
+
+.widget-collapsed .widget-tabs {
+  margin: 2px 0;
+  padding: 1px;
+  gap: 2px;
+}
+.widget-collapsed .widget-tabs button {
+  min-height: 22px;
+  padding: 1px 4px;
+  font-size: 11px;
+}
+.window-widget .mini-brand {
+  gap: 5px;
+}

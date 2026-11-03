@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-reminder-action"
+description = "Enables the reminder_action command without any pre-configured scope."
+commands.allow = ["reminder_action"]
+
+[[permission]]
+identifier = "deny-reminder-action"
+description = "Denies the reminder_action command without any pre-configured scope."
+commands.deny = ["reminder_action"]

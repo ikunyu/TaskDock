@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Main window may update theme and show predefined child windows",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "foundation-theme",
+    "foundation-show",
+    "tasks-create",
+    "tasks-edit",
+    "tasks-status",
+    "desktop-settings",
+    "schedule-edit",
+    "data-tools",
+    "app-updates"
+  ]
+}

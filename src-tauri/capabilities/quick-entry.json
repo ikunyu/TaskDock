@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "quick-entry",
+  "description": "Quick entry may only hide its own window",
+  "local": true,
+  "windows": ["quick-entry"],
+  "permissions": ["foundation-hide", "tasks-create"]
+}

@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "app-updates"
+description = "Main window checks a fixed signed release source and applies only its verified cached update"
+commands.allow = ["update_status", "check_for_updates", "download_update", "install_update"]

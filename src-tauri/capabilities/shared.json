@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "shared",
+  "description": "Local settings read and event subscription for the three declared windows only",
+  "local": true,
+  "windows": ["main", "widget", "quick-entry"],
+  "permissions": [
+    "foundation-read",
+    "tasks-read",
+    "foundation-report",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "desktop-read"
+  ]
+}

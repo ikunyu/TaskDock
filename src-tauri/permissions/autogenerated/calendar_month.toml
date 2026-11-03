@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-calendar-month"
+description = "Enables the calendar_month command without any pre-configured scope."
+commands.allow = ["calendar_month"]
+
+[[permission]]
+identifier = "deny-calendar-month"
+description = "Denies the calendar_month command without any pre-configured scope."
+commands.deny = ["calendar_month"]

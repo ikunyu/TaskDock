@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "data-tools"
+description = "Main only: paginated queries, fixed backup inventory, confirmed restore and native-dialog export"
+commands.allow = ["data_status", "save_backup_settings", "backup_now", "restore_backup", "search_tasks", "calendar_month", "export_data", "open_backup_directory"]
