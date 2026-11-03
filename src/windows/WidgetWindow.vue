@@ -50,6 +50,25 @@ const surface = ref<HTMLElement>(),
   header = ref<HTMLElement>(),
   content = ref<HTMLElement>(),
   textProbe = ref<HTMLElement>();
+let lockBoundsKey = '';
+async function syncLockBounds() {
+  const button = surface.value?.querySelector('.widget-lock');
+  if (!button || !app.ready || disposed) return;
+  const rect = button.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const bounds = { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  const key = JSON.stringify(bounds);
+  if (key === lockBoundsKey) return true;
+  try {
+    await bridge.widgetLockBounds(bounds);
+    lockBoundsKey = key;
+    return true;
+  } catch (error) {
+    lockBoundsKey = '';
+    if (!disposed) app.fail(error);
+    return false;
+  }
+}
 let layoutQueue = Promise.resolve(),
   layoutRequest = 0,
   nativeExpanded = true,
@@ -68,6 +87,7 @@ function scheduleLayout() {
 }
 async function syncLayout() {
   await nextTick();
+  await syncLockBounds();
   if (
     disposed ||
     !app.ready ||
@@ -252,15 +272,17 @@ async function openQuick() {
     app.fail(error);
   }
 }
-async function windowAction(action: 'drag' | 'resize' | 'hide' | 'lock') {
-  if (action === 'lock' && locking.value) return;
-  if (action === 'lock') locking.value = true;
+async function windowAction(action: 'drag' | 'resize' | 'hide' | 'lock' | 'unlock') {
+  const changesLock = action === 'lock' || action === 'unlock';
+  if (changesLock && locking.value) return;
+  if (changesLock) locking.value = true;
   try {
+    if (changesLock && (await syncLockBounds()) === false) return;
     await bridge.widgetAction(action);
   } catch (error) {
     app.fail(error);
   } finally {
-    if (action === 'lock') locking.value = false;
+    if (changesLock) locking.value = false;
   }
 }
 function drag(event: MouseEvent) {
@@ -307,11 +329,12 @@ function resize(event: MouseEvent) {
         <AppButton
           variant="ghost"
           class="widget-lock"
-          aria-label="锁定悬浮窗"
-          title="锁定后鼠标穿透，右键系统托盘可解锁"
+          :class="{ 'widget-lock-placeholder': app.desktop.widgetLocked }"
+          :aria-label="app.desktop.widgetLocked ? '解锁悬浮窗' : '锁定悬浮窗'"
+          :title="app.desktop.widgetLocked ? '点击解锁悬浮窗' : '锁定后鼠标穿透，再点锁形按钮解锁'"
           :aria-pressed="app.desktop.widgetLocked"
           :disabled="locking || store.busy || app.busy"
-          @click="windowAction('lock')"
+          @click="windowAction(app.desktop.widgetLocked ? 'unlock' : 'lock')"
           ><AppIcon name="lock" :size="13"
         /></AppButton>
         <AppButton

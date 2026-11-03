@@ -164,7 +164,7 @@ onUnmounted(() => {
               :disabled="app.busy || dataBusy"
             />锁定悬浮窗（鼠标穿透）</label
           >
-          <p class="muted small">锁定后可右键系统托盘，选择“解锁悬浮窗”。</p>
+          <p class="muted small">锁定后点击小组件的锁形按钮即可解锁，也可从托盘解锁。</p>
           <label class="setting-check"
             ><input
               v-model="draft.widgetVisible"

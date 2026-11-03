@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-widget-lock-bounds"
+description = "Enables the set_widget_lock_bounds command without any pre-configured scope."
+commands.allow = ["set_widget_lock_bounds"]
+
+[[permission]]
+identifier = "deny-set-widget-lock-bounds"
+description = "Denies the set_widget_lock_bounds command without any pre-configured scope."
+commands.deny = ["set_widget_lock_bounds"]

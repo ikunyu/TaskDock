@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-widget-lock-control-ready"
+description = "Enables the widget_lock_control_ready command without any pre-configured scope."
+commands.allow = ["widget_lock_control_ready"]
+
+[[permission]]
+identifier = "deny-widget-lock-control-ready"
+description = "Denies the widget_lock_control_ready command without any pre-configured scope."
+commands.deny = ["widget_lock_control_ready"]

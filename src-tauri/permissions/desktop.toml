@@ -9,4 +9,8 @@ commands.allow=["save_desktop_settings","reset_window_positions","exit_app"]
 [[permission]]
 identifier="desktop-widget"
 description="Drag, resize, size content or lock the caller widget only"
-commands.allow=["widget_window_action","set_widget_layout","lock_widget"]
+commands.allow=["widget_window_action","set_widget_layout","lock_widget","unlock_widget","set_widget_lock_bounds"]
+[[permission]]
+identifier="desktop-widget-unlock"
+description="Only unlock the widget and announce the button control ready"
+commands.allow=["unlock_widget","widget_lock_control_ready"]

@@ -67,6 +67,7 @@ pub fn run() {
                 legacy_directory,
             )));
             app.manage(desktop::DesktopRuntime::default());
+            desktop::lock_control::initialize(app.handle());
             app.manage(schedule::OpenTask::default());
             app.manage(updates::UpdateRuntime::default());
             for config in &app.config().app.windows {
@@ -75,6 +76,7 @@ pub fn run() {
                     .build()?;
             }
             desktop::install_tray(app.handle())?;
+            desktop::lock_control::create(app.handle(), paths.webview.clone())?;
             let background = std::env::args().any(|arg| arg == "--background");
             desktop::initialize(app.handle().clone(), background);
             schedule::start(app.handle().clone());
@@ -116,6 +118,9 @@ pub fn run() {
             desktop::exit_app,
             desktop::widget_window_action,
             desktop::lock_widget,
+            desktop::unlock_widget,
+            desktop::set_widget_lock_bounds,
+            desktop::widget_lock_control_ready,
             desktop::set_widget_layout
         ])
         .build(tauri::generate_context!());

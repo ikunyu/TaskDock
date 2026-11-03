@@ -15,7 +15,7 @@ describe('IPC security configuration', () => {
     expect(widget).not.toContain('tasks-edit');
   });
   it('grants only local named-window capabilities without broad core or filesystem access', () => {
-    for (const name of ['shared', 'main', 'widget', 'quick-entry']) {
+    for (const name of ['shared', 'main', 'widget', 'quick-entry', 'widget-lock']) {
       const capability = JSON.parse(read(`capabilities/${name}.json`));
       expect(capability.local).toBe(true);
       expect(capability.remote).toBeUndefined();
@@ -42,11 +42,18 @@ describe('IPC security configuration', () => {
     expect(config.app.security.csp).not.toContain('https:');
     expect(
       config.app.windows.find((window: { label: string }) => window.label === 'widget'),
-    ).toMatchObject({ width: 200, height: 240, visible: false });
+    ).toMatchObject({ width: 180, height: 240, visible: false });
   });
 });
 
 describe('desktop capabilities', () => {
+  it('limits the lock control to settings reads and unlock without task access', () => {
+    const permissions = JSON.parse(read('capabilities/widget-lock.json')).permissions;
+    expect(permissions).toContain('desktop-widget-unlock');
+    expect(permissions).not.toContain('tasks-read');
+    expect(permissions).not.toContain('desktop-settings');
+    expect(permissions).not.toContain('desktop-widget');
+  });
   it('keeps native plugins behind bounded Rust commands', () => {
     const main = JSON.parse(read('capabilities/main.json')).permissions;
     const widget = JSON.parse(read('capabilities/widget.json')).permissions;

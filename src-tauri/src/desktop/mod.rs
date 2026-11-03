@@ -1,5 +1,6 @@
 mod commands;
 pub mod geometry;
+pub(crate) mod lock_control;
 mod native;
 mod runtime;
 pub mod settings;

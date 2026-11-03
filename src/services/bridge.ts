@@ -54,16 +54,25 @@ export const bridge = {
     nativeMode
       ? invoke('exit_app')
       : Promise.reject({ code: 'DESKTOP_REQUIRED', message: '此操作需要 Windows 桌面版。' }),
-  widgetAction: (action: 'drag' | 'resize' | 'hide' | 'lock'): Promise<void> =>
+  widgetAction: (action: 'drag' | 'resize' | 'hide' | 'lock' | 'unlock'): Promise<void> =>
     nativeMode
       ? action === 'hide'
         ? invoke('hide_current_window')
         : action === 'lock'
           ? invoke('lock_widget')
-          : invoke('widget_window_action', { action })
+          : action === 'unlock'
+            ? invoke('unlock_widget')
+            : invoke('widget_window_action', { action })
       : Promise.reject({ code: 'DESKTOP_REQUIRED', message: '此操作需要 Windows 桌面版。' }),
   widgetLayout: (expanded: boolean, width: number, height: number): Promise<void> =>
     nativeMode ? invoke('set_widget_layout', { expanded, width, height }) : Promise.resolve(),
+  widgetLockBounds: (bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }): Promise<void> =>
+    nativeMode ? invoke('set_widget_lock_bounds', { bounds }) : Promise.resolve(),
   onOpenSettings: async (callback: () => void): Promise<() => void> =>
     nativeMode ? listen('taskdock://open-settings', callback) : () => {},
   onQuickFocus: async (callback: () => void): Promise<() => void> =>

@@ -99,6 +99,9 @@ html[data-window='widget'] #app {
   min-height: 22px;
   padding: 2px;
 }
+.widget-lock-placeholder {
+  visibility: hidden;
+}
 .widget-header button {
   cursor: pointer;
 }

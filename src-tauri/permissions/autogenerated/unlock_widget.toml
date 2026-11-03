@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-unlock-widget"
+description = "Enables the unlock_widget command without any pre-configured scope."
+commands.allow = ["unlock_widget"]
+
+[[permission]]
+identifier = "deny-unlock-widget"
+description = "Denies the unlock_widget command without any pre-configured scope."
+commands.deny = ["unlock_widget"]

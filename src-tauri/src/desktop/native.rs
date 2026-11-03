@@ -2,14 +2,26 @@
 /// flags and Windows layered alpha in order on the same UI-thread turn. Updating
 /// ignore-cursor flags can remove WS_EX_LAYERED, so alpha must be applied last.
 pub fn widget_style(window: &tauri::WebviewWindow, percent: u8, locked: bool) -> tauri::Result<()> {
+    on_window_thread(window, move |target| {
+        target.set_ignore_cursor_events(locked)?;
+        target.set_focusable(!locked)?;
+        opacity(target, percent)
+    })
+}
+pub fn lock_control_style(window: &tauri::WebviewWindow, percent: u8) -> tauri::Result<()> {
+    on_window_thread(window, move |target| {
+        target.set_focusable(false)?;
+        opacity(target, percent)
+    })
+}
+fn on_window_thread(
+    window: &tauri::WebviewWindow,
+    operation: impl FnOnce(&tauri::WebviewWindow) -> tauri::Result<()> + Send + 'static,
+) -> tauri::Result<()> {
     let target = window.clone();
     let (send, receive) = std::sync::mpsc::sync_channel(1);
     window.run_on_main_thread(move || {
-        let result = (|| {
-            target.set_ignore_cursor_events(locked)?;
-            target.set_focusable(!locked)?;
-            opacity(&target, percent)
-        })();
+        let result = operation(&target);
         let _ = send.send(result.map_err(|e: tauri::Error| e.to_string()));
     })?;
     receive

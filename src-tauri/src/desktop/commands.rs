@@ -85,6 +85,42 @@ pub async fn lock_widget(app: AppHandle, window: WebviewWindow) -> Result<(), Ap
         .await
         .map_err(AppError::internal)?
 }
+#[tauri::command]
+pub async fn unlock_widget(app: AppHandle, window: WebviewWindow) -> Result<(), AppError> {
+    if !matches!(window.label(), "widget" | "widget-lock") {
+        return Err(AppError::forbidden());
+    }
+    tauri::async_runtime::spawn_blocking(move || runtime::set_widget_locked(&app, false))
+        .await
+        .map_err(AppError::internal)?
+}
+#[tauri::command]
+pub async fn set_widget_lock_bounds(
+    app: AppHandle,
+    window: WebviewWindow,
+    bounds: super::lock_control::Bounds,
+) -> Result<(), AppError> {
+    if window.label() != "widget" {
+        return Err(AppError::forbidden());
+    }
+    super::lock_control::set_bounds(&app, bounds)?;
+    tauri::async_runtime::spawn_blocking(move || runtime::sync_lock_control(&app))
+        .await
+        .map_err(AppError::internal)?
+}
+#[tauri::command]
+pub async fn widget_lock_control_ready(
+    app: AppHandle,
+    window: WebviewWindow,
+) -> Result<(), AppError> {
+    if window.label() != "widget-lock" {
+        return Err(AppError::forbidden());
+    }
+    super::lock_control::ready(&app);
+    tauri::async_runtime::spawn_blocking(move || runtime::sync_lock_control(&app))
+        .await
+        .map_err(AppError::internal)?
+}
 pub fn show_widget(app: &AppHandle) -> Result<(), AppError> {
     runtime::visibility(app, true)?;
     runtime::present(app, "widget")

@@ -173,6 +173,7 @@ pub fn set_widget_layout(
         return Err(error);
     }
     *layout = next;
+    super::lock_control::sync(app, &prefs.desktop)?;
     Ok(())
 }
 fn internal(e: impl std::fmt::Display) -> AppError {
@@ -344,6 +345,7 @@ pub fn present(app: &AppHandle, label: &str) -> Result<(), AppError> {
             prefs.desktop.widget_locked,
         )
         .map_err(internal)?;
+        super::lock_control::sync(app, &prefs.desktop)?;
     }
     if label != "widget"
         || !app
@@ -369,6 +371,7 @@ fn apply_widget(app: &AppHandle, p: &DesktopSettings) -> Result<(), AppError> {
         w.hide().map_err(internal)?;
     }
     native::widget_style(&w, p.widget_opacity, p.widget_locked).map_err(internal)?;
+    super::lock_control::sync(app, p)?;
     app.state::<DesktopRuntime>()
         .widget_locked
         .store(p.widget_locked, Ordering::SeqCst);
@@ -550,6 +553,9 @@ pub fn visibility(app: &AppHandle, visible: bool) -> Result<(), AppError> {
             prefs.desktop.widget_locked,
         )
         .map_err(internal)?;
+        let mut next = prefs.desktop.clone();
+        next.widget_visible = visible;
+        super::lock_control::sync(app, &next)?;
         service(app)
             .with_database(|db| db.set_widget_visibility(visible))
             .map_err(AppError::service)
@@ -566,6 +572,7 @@ pub fn visibility(app: &AppHandle, visible: bool) -> Result<(), AppError> {
                 prefs.desktop.widget_opacity,
                 prefs.desktop.widget_locked,
             );
+            let _ = super::lock_control::sync(app, &prefs.desktop);
             return Err(error);
         }
     };
@@ -587,6 +594,9 @@ pub fn set_widget_locked(app: &AppHandle, locked: bool) -> Result<(), AppError> 
         .ok_or_else(|| internal("widget missing"))?;
     let result = (|| {
         native::widget_style(&w, old.desktop.widget_opacity, locked).map_err(internal)?;
+        let mut next = old.desktop.clone();
+        next.widget_locked = locked;
+        super::lock_control::sync(app, &next)?;
         service(app)
             .with_database(|db| db.set_widget_locked(locked))
             .map_err(AppError::service)
@@ -600,12 +610,21 @@ pub fn set_widget_locked(app: &AppHandle, locked: bool) -> Result<(), AppError> 
                 log::warn!("widget lock rollback failed: {e}");
                 warn(app, "悬浮窗锁定状态恢复失败，请从托盘解锁后重试。");
             }
+            let _ = super::lock_control::sync(app, &old.desktop);
             return Err(error);
         }
     };
     rt.widget_locked.store(locked, Ordering::SeqCst);
     let _ = app.emit(SETTINGS_EVENT, &snapshot);
     Ok(())
+}
+pub fn sync_lock_control(app: &AppHandle) -> Result<(), AppError> {
+    let rt = app.state::<DesktopRuntime>();
+    let _gate = rt.gate.lock().map_err(internal)?;
+    if rt.quitting.load(Ordering::SeqCst) {
+        return Ok(());
+    }
+    super::lock_control::sync_current(app)
 }
 pub fn shortcut_pressed(app: &AppHandle, shortcut: &Shortcut) {
     let active = status(app)
@@ -751,6 +770,21 @@ pub fn shutdown(app: &AppHandle) {
     });
 }
 pub fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
+    if window.label() == "widget"
+        && matches!(
+            event,
+            tauri::WindowEvent::Moved(_)
+                | tauri::WindowEvent::Resized(_)
+                | tauri::WindowEvent::ScaleFactorChanged { .. }
+        )
+    {
+        let app = window.app_handle().clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            if let Err(error) = sync_lock_control(&app) {
+                log::warn!("lock button position sync: {}", error.code);
+            }
+        });
+    }
     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
         api.prevent_close();
         let app = window.app_handle();

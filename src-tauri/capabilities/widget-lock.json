@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "widget-lock",
+  "description": "Button-only local unlock control; no task, file or generic window access",
+  "local": true,
+  "windows": ["widget-lock"],
+  "permissions": [
+    "foundation-read",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "desktop-widget-unlock"
+  ]
+}

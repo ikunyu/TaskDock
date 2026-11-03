@@ -36,3 +36,10 @@ npm run typecheck、Rust格式检查及受影响配置/TypeScript文件Prettier�
 悬浮小组件新增锁形按钮，展开/收起时均可锁定，锁定后整体鼠标穿透；托盘“解锁悬浮窗”与主窗口设置提供解除入口。锁定状态重启保留。不透明度范围改为20%～100%。新增Schema8迁移，保留任务、旧设置及备份记录，不修改0001–0007迁移。实现和待体验项目见[锁定说明](widget-lock.md)。
 
 实际执行：npm run typecheck、cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked、Rust格式检查及受影响前端文件Prettier检查通过；npm run package:windows成功生成1.1.1 EXE与NSIS包，内部构建202611030004；签名及安装包兼容别名核对通过。没有执行npm test/cargo test、GUI操作、启动软件或真实数据库迁移。新增/调整回归用例仅完成静态编译。实际鼠标穿透、解锁、DPI、迁移、安装重启仍待用户体验。
+
+### 1.1.1：锁形按钮直接解锁（内部构建202611030005）
+
+版本保持1.1.1，数据库继续Schema8，迁移未改动。锁定期间只保留锁按钮可点击，点击后直接解锁，其余区域仍向下方应用透传鼠标。按钮辅助页仅有设置读取、订阅及受限解锁权限，不加载任务Store；按widget按钮矩形和DPI同步位置、显隐、置顶、不透明度及主题，托盘入口继续保留。
+
+实际静态检查：npm run typecheck、cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked、Rust格式检查和受影响前端Prettier检查通过。未执行npm test/cargo test、启动软件、GUI或数据库操作。Windows点击穿透、按钮定位与解锁、任务栏图标、不同DPI及实际安装重启仍待用户体验。
+正式构建：npm run package:windows成功，保持1.1.1，内部构建202611030005；EXE、NSIS包及多入口前端资源已生成，签名与兼容下载别名核对通过。

@@ -167,3 +167,7 @@ prepare优先已有data数据库。首次迁入使用现有SQLite Online Backup�
 release-config.json提供内部build ID，build.rs校验并编入TASKDOCK_BUILD_ID；公开应用/产品版本保持1.0.0。远程版本为1.0.0+build，使用官方version_comparator按数值只接受更大构建。公钥嵌入配置，requireSignedVersion=true；CLI以--app-version 1.0.0+build重新签署NSIS包，构建号位于受签名保护的trusted comment，防止只改更新JSON冒充新构建。私钥及CLI凭据仅.private目录，不上传或打进源码包。
 
 启动八秒后后台检查，单次20秒超时；下载有180秒超时及进度事件，官方download/verify双重验证后缓存在内存，不执行未签名包。用户再确认安装：保存窗口状态、按现有生命周期锁排空写入并关闭SQLite，然后让Windows安装器替换应用；NSIS最后的/D=指向当前EXE目录，防止默认改装C盘。退出钩子注销快捷键并执行Tauri cleanup，成功由官方插件退出/重启；提取前错误可恢复服务，cleanup之后失败用原生错误消息并直接退出，避免调用已清理资源或留下孤儿进程。data及备份不被作为安装资源替换。
+
+### 1.1.1直接解锁按钮
+
+锁定时，按钮以外区域继续由Windows原生窗口样式鼠标穿透；同位置的按钮尺寸owned辅助窗口接收解锁点击。辅助窗口无任务/文件/任意窗口权限，不获取焦点或显示任务栏图标；主窗口、widget和quick-entry仍复用现有服务，辅助页只读取设置及发起受限解锁。Rust按widget上报的按钮矩形、当前客户区位置和DPI同步辅助按钮，不通过全屏捕获、鼠标轮询或键盘钩子实现。见[锁定说明](widget-lock.md)。
