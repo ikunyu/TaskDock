@@ -107,7 +107,10 @@ pub fn set_widget_layout(
     if !width.is_finite()
         || !(120.0..=480.0).contains(&width)
         || !height.is_finite()
-        || !(44.0..=600.0).contains(&height)
+        // The expanded window already allows 800 logical pixels of height and
+        // its content is now sized from the real task list, so a taller request
+        // is valid; the compact window stays within its own 600 ceiling.
+        || !(44.0..=800.0).contains(&height)
     {
         return Err(AppError::service(crate::error::ServiceError::Validation(
             "悬浮窗内容尺寸无效。",
