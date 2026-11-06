@@ -119,9 +119,6 @@ pub fn set_widget_layout(
     let rt = app.state::<DesktopRuntime>();
     let _gate = rt.gate.lock().map_err(internal)?;
     let mut layout = rt.widget_layout.lock().map_err(internal)?;
-    // Kept at info level: a widget that keeps resizing itself is diagnosed from
-    // this sequence in logs/taskdock.log.
-    log::info!("widget layout request: expanded={expanded} width={width:.1} height={height:.1}");
     let w = app
         .get_webview_window("widget")
         .ok_or_else(|| internal("widget missing"))?;
