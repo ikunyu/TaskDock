@@ -124,7 +124,7 @@ async function syncLayout() {
       );
     }
     let weekWidth = 0;
-    const period = root.querySelector('.widget-week-period'),
+    const period = root.querySelector('.widget-group-title'),
       dates = root.querySelector('.widget-week-dates');
     if (dates) {
       for (const week of futureWeeks.value) {
@@ -181,7 +181,7 @@ async function syncLayout() {
   // Both modes size to the real content. The ceiling only stops a long list from
   // growing past the screen work area; it is not a fixed window height.
   const workArea = Math.round(((window.screen?.availHeight || 900) * 7) / 10);
-  const limit = Math.min(600, Math.max(workArea, Math.ceil(fixedHeight + 24)));
+  const limit = Math.min(mode ? 800 : 600, Math.max(workArea, Math.ceil(fixedHeight + 24)));
   lastHeight = Math.min(
     limit,
     Math.max(mode ? 120 : 72, Math.ceil(fixedHeight + body.scrollHeight + 2)),
@@ -350,23 +350,22 @@ function resize(event: MouseEvent) {
         <p v-if="!store.ready" class="muted small">正在读取任务…</p>
         <template v-else>
           <section v-if="todayTasks.length" class="widget-group" aria-label="今日">
+            <h2 class="widget-group-heading">
+              <span class="widget-group-title">今日</span>
+            </h2>
             <TaskList :tasks="todayTasks" compact :minimal="!expanded" :inline-date="expanded" />
           </section>
-          <section v-if="futureWeeks.length" class="widget-group" aria-label="未来">
-            <section
-              v-for="week in futureWeeks"
-              :key="week.start"
-              class="widget-week-group"
-              :aria-label="weekLabel(week)"
-            >
-              <h2>
-                <span v-if="weekPrefix(week)" class="widget-week-period">{{
-                  weekPrefix(week)
-                }}</span
-                ><span class="widget-week-dates">{{ weekRange(week) }}</span>
-              </h2>
-              <TaskList :tasks="week.tasks" compact :minimal="!expanded" :inline-date="expanded" />
-            </section>
+          <section
+            v-for="week in futureWeeks"
+            :key="week.start"
+            class="widget-group"
+            :aria-label="weekLabel(week)"
+          >
+            <h2 class="widget-group-heading">
+              <span v-if="weekPrefix(week)" class="widget-group-title">{{ weekPrefix(week) }}</span
+              ><span class="widget-week-dates">{{ weekRange(week) }}</span>
+            </h2>
+            <TaskList :tasks="week.tasks" compact :minimal="!expanded" :inline-date="expanded" />
           </section>
         </template>
       </div>

@@ -112,26 +112,48 @@ html[data-window='widget'] #app {
 }
 .widget-group + .widget-group {
   margin-top: 8px;
+}
+/* Expanded: every group is a framed block and every task a smaller frame. */
+.window-widget .widget-layout:not(.widget-collapsed) .widget-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 5px 5px;
+}
+.window-widget .widget-layout:not(.widget-collapsed) .widget-group .task-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+.window-widget .widget-layout:not(.widget-collapsed) .task-compact {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+/* Collapsed: groups are split by a rule and tasks only by spacing. */
+.widget-collapsed .widget-group + .widget-group {
+  margin-top: 6px;
   padding-top: 6px;
   border-top: 1px solid var(--border);
 }
-.widget-week-group + .widget-week-group {
-  margin-top: 6px;
+.widget-collapsed .task-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
 }
-.widget-week-group > h2 {
+.widget-group-heading {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px;
   margin: 0;
-  padding: 2px 0 3px;
+  padding: 2px 1px 3px;
   color: var(--text);
   font-size: 10px;
   font-weight: 500;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-.widget-week-period {
+.widget-group-title {
   font-size: var(--widget-week-font, 15px);
   font-weight: 650;
 }
@@ -140,7 +162,7 @@ html[data-window='widget'] #app {
   font-size: var(--widget-week-date-font, 10px);
 }
 /* A week without a 本周/下周 prefix shows only its range, so that range takes
-   the week heading role instead of looking like a caption. */
+   the heading role instead of looking like a caption. */
 .widget-week-dates:only-child {
   color: var(--text);
   font-size: var(--widget-week-font, 15px);
@@ -202,9 +224,6 @@ html[data-window='widget'] #app {
   padding: 1px 0;
   align-items: center;
   border-bottom: 0;
-}
-.widget-collapsed .task-compact:not(:last-child) {
-  border-bottom: 1px solid var(--border);
 }
 .widget-collapsed .task-title {
   display: block;
