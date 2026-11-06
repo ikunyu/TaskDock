@@ -8,7 +8,7 @@
 | --------------- | ------------------------------------------------------------------------------------------ |
 | 原开发目录      | `F:\tododock`；迁移后以新目录为准，运行数据位置由实际 EXE 路径决定                         |
 | 应用名称 / 标识 | TaskDock / `com.taskdock.desktop`                                                          |
-| 显示版本        | **1.1.1**；未经用户要求，不自动提高版本                                                    |
+| 显示版本        | **1.2.0**；未经用户要求，不自动提高版本                                                    |
 | SQLite 目标     | **Schema 8**，8 个上行迁移、7 个下行脚本，共 15 个 SQL 文件                                |
 | 内部构建号      | **202611030007**，见 `release-config.json`                                                 |
 | 更新协议版本    | `1.0.0+202611030007`；与显示版本分开管理                                                   |
@@ -159,9 +159,9 @@ cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 
 ### 版本规则
 
-- 显示版本维持1.1.1，只有用户明确要求才提高。提高时同步 package.json/lock、Cargo.toml/lock、tauri.conf.json、release-config.json，以及 app Store / bridge 的初始版本。
+- 显示版本为1.2.0，只有用户明确要求才提高。提高时同步 package.json/lock、Cargo.toml/lock、tauri.conf.json、release-config.json，以及 app Store / bridge 的初始版本。
 - 发布一次新程序时递增 `release-config.json.build`。`npm run package:windows` 会自动递增，所以重试同一未发布构建不要再次加号。
-- 更新客户端固定识别 `1.0.0+BUILD` 和兼容文件名 `TaskDock_1.0.0_x64-setup.exe`。**不能只因显示版本已是1.1.1就改掉这两个值。** 兼容别名与真实版本安装包字节相同。
+- 更新客户端固定识别 `1.0.0+BUILD` 和兼容文件名 `TaskDock_1.0.0_x64-setup.exe`。**不能只因显示版本已是1.2.0就改掉这两个值。** 兼容别名与真实版本安装包字节相同。
 - 更新地址固定为 `https://github.com/ikunyu/TaskDock/releases/latest/download/latest.json`，下载 URL 也限制在该仓库。移动开发目录不需要改地址；换仓库涉及旧客户端升级桥接，不能直接替换后假定旧设备可用。
 
 ### 新维护者认证
@@ -211,9 +211,9 @@ npm run package:windows
 
 | 文件                                               | 参考值                                                                                    |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `TaskDock.exe`                                     | 19,209,728字节；SHA256 `51B36C558AB53330F2C5C53EC22ED40C528960CECBDD3384824BF6D2F217F04F` |
-| `TaskDock_1.1.1_x64-setup.exe`                     | 6,621,302字节；SHA256 `98279008E0F3EB427EAAC01DB92743B592615EFD5518B479EC1C76C5E0F8B446`  |
-| `TaskDock-1.1.1-source.zip`                        | 源码归档，无私钥/凭据/任务数据；新增交接文档后归档内容及哈希可能更新                      |
+| `TaskDock.exe`                                     | 19,211,264字节；SHA256 `F8906B4D27375A75D355B27F0960B070F8A2C9DFA5B3527FA6B9A9AC057F9336` |
+| `TaskDock_1.2.0_x64-setup.exe`                     | 6,624,477字节；SHA256 `BFE5139E07AF93A0382F4B2FA9D8700E17920E3C1EAE4BD829632CF3434107ED`  |
+| `TaskDock-1.2.0-source.zip`                        | 源码归档，无私钥/凭据/任务数据；新增交接文档后归档内容及哈希可能更新                      |
 | `latest.json`、`.exe.sig`、`UPDATE-SHA256SUMS.txt` | 更新清单、签名与发布资产校验信息                                                          |
 
 NSIS 按当前用户安装，缺少 WebView2 时联网安装运行时。普通卸载保留非空 data、logs、webview；不能为了打包递归删除安装目录。正式安装/卸载的实际结果仍待验收。
@@ -266,7 +266,7 @@ NSIS 按当前用户安装，缺少 WebView2 时联网安装运行时。普通�
 
 ```text
 你接手的是 TaskDock Windows 桌面待办项目，请先读项目根目录 HANDOFF.md、README.md、CONTRIBUTING.md，再核对实际源码、Git状态和 release-config.json。
-原目录 F:\tododock，若已移动，以我提供的新目录为准。当前业务基线为1.1.1、Schema8、内部build202611030007；继续核对实际最新提交。
+原目录 F:\tododock，若已移动，以我提供的新目录为准。当前业务基线为1.2.0、Schema8、内部build202611030015；继续核对实际最新提交。
 保留唯一Rust LocalService、SQLite、revision事件、任务version乐观锁、设置草稿以及分窗口最小权限。
 保留最新的开锁/关锁图标、直接点击解锁和统一透明度实现；widget-lock辅助页仅负责输入，不重复绘制可见图标。
 不要重初始化、修改已发布迁移、删除用户数据、上传私钥或擅自提高显示版本。

@@ -1,6 +1,6 @@
 # 参与 TaskDock 开发
 
-源码仓库：[ikunyu/TaskDock](https://github.com/ikunyu/TaskDock)。当前应用版本为 **1.1.1**，数据库目标为 **Schema 8**。安装包在 Releases 发布，源码通过 Git 分支和 Pull Request 协作。
+源码仓库：[ikunyu/TaskDock](https://github.com/ikunyu/TaskDock)。当前应用版本为 **1.2.0**，数据库目标为 **Schema 8**。安装包在 Releases 发布，源码通过 Git 分支和 Pull Request 协作。
 
 ## 准备开发环境
 
@@ -57,6 +57,6 @@ git push -u origin feat/your-change
 
 普通功能修改保持当前应用版本；仅在维护者明确决定时提高版本号。应用版本涉及 package.json/lock、Cargo.toml/lock、tauri.conf.json、release-config.json 和前端初始版本值，必须一致。
 
-GitHub 更新识别独立递增的内部 build。**不要修改 `1.0.0+build` 更新协议前缀或删除 `TaskDock_1.0.0_x64-setup.exe` 兼容下载别名**，它们供已安装客户端识别新版，实际应用版本可为 1.1.1。
+GitHub 更新识别独立递增的内部 build。**不要修改 `1.0.0+build` 更新协议前缀或删除 `TaskDock_1.0.0_x64-setup.exe` 兼容下载别名**，它们供已安装客户端识别新版，实际应用版本可为 1.2.0。
 
 正式签名、构建和发布由持有原始私钥的维护者负责。协作者不需要获取私钥；不要生成新密钥覆盖现有更新通道。源码提交不会自动发布安装包，也没有配置自动发布工作流。发布步骤见 [GitHub 更新说明](docs/github-updates.md)。

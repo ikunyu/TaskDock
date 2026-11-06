@@ -17,7 +17,7 @@ import {
 
 export const nativeMode = isTauri();
 let preview: BootstrapSnapshot = {
-  appVersion: '1.1.1',
+  appVersion: '1.2.0',
   schemaVersion: 0,
   desktop: defaultDesktopSettings(),
   theme: 'system',
