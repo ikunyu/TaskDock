@@ -265,6 +265,18 @@ html[data-window='widget'] #app {
 .window-widget .widget-scroll {
   min-height: 0;
 }
+/* Keep the reserved gutter narrow; the default track is far too wide for a
+   180 logical pixel widget. */
+.window-widget .widget-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.window-widget .widget-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+.window-widget .widget-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
 .window-widget .widget-summary {
   padding-bottom: 6px;
 }

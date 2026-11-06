@@ -402,6 +402,11 @@ body,
   flex: 1;
   min-height: 110px;
   overflow: auto;
+  /* Reserve the scrollbar track in both modes. Without it the track appears only
+     when the content overflows, which changes the text width, which changes the
+     measured content height, which resizes the window back out of overflow: an
+     endless expand/shrink loop that depends on DPI and font metrics. */
+  scrollbar-gutter: stable;
   display: flex;
   align-items: center;
   justify-content: center;
