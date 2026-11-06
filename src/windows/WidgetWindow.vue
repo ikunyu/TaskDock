@@ -18,7 +18,6 @@ const fontStyle = computed(() => {
     '--widget-compact-font': `${fonts.widgetCompactFontSize}px`,
     '--widget-date-font': `${fonts.widgetDateFontSize}px`,
     '--widget-week-font': `${fonts.widgetWeekFontSize}px`,
-    '--widget-week-date-font': `${fonts.widgetWeekDateFontSize}px`,
   };
 });
 const todayTasks = computed(() => widgetTasks(store.tasks, store.today, store.now, 'today'));

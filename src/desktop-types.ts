@@ -37,6 +37,11 @@ export const widgetFontOptions = [
   { key: 'widgetFontSize', label: '展开任务', min: 10, max: 20, defaultValue: 13 },
   { key: 'widgetCompactFontSize', label: '收起任务', min: 10, max: 24, defaultValue: 14 },
   { key: 'widgetDateFontSize', label: '任务日期 / 时间', min: 8, max: 18, defaultValue: 10 },
-  { key: 'widgetWeekFontSize', label: '周标题（本周 / 下周）', min: 10, max: 26, defaultValue: 15 },
-  { key: 'widgetWeekDateFontSize', label: '周日期范围', min: 8, max: 18, defaultValue: 10 },
+  {
+    key: 'widgetWeekFontSize',
+    label: '分组标题（今日 / 未来）',
+    min: 10,
+    max: 26,
+    defaultValue: 15,
+  },
 ] as const;
