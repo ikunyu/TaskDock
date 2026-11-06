@@ -8,6 +8,27 @@ pub fn widget_style(window: &tauri::WebviewWindow, percent: u8, locked: bool) ->
         opacity(target, percent)
     })
 }
+/// Re-assert the configured topmost state only when the live window disagrees.
+/// Rewriting GWL_EXSTYLE for the layered/cursor flags can drop WS_EX_TOPMOST, and
+/// the startup apply can run before the widget window exists, so the state is
+/// checked here instead of assuming the earlier call still holds.
+pub fn ensure_topmost(window: &tauri::WebviewWindow, topmost: bool) -> tauri::Result<()> {
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::UI::WindowsAndMessaging::{
+            GetWindowLongW, GWL_EXSTYLE, WS_EX_TOPMOST,
+        };
+        let hwnd = window.hwnd()?.0 as windows_sys::Win32::Foundation::HWND;
+        // SAFETY: the handle belongs to this process's own widget window and is
+        // only read, never modified here.
+        let style = unsafe { GetWindowLongW(hwnd, GWL_EXSTYLE) };
+        let is_topmost = (style as u32 & WS_EX_TOPMOST) != 0;
+        if is_topmost == topmost {
+            return Ok(());
+        }
+    }
+    window.set_always_on_top(topmost)
+}
 pub fn lock_control_style(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     on_window_thread(window, move |target| {
         target.set_focusable(false)?;

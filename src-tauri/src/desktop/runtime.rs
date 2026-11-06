@@ -154,21 +154,11 @@ pub fn set_widget_layout(
     }
     let at = safe.as_ref().map(|p| (p.x, p.y));
     let prefs = service(app).settings().map_err(AppError::service)?;
-    let operation = apply_widget_layout(&w, &next, at).and_then(|_| {
-        native::widget_style(
-            &w,
-            prefs.desktop.widget_opacity,
-            prefs.desktop.widget_locked,
-        )
-        .map_err(internal)
-    });
+    let operation =
+        apply_widget_layout(&w, &next, at).and_then(|_| style_widget(&w, &prefs.desktop));
     if let Err(error) = operation {
         let _ = apply_widget_layout(&w, &previous, Some((position.x, position.y)));
-        let _ = native::widget_style(
-            &w,
-            prefs.desktop.widget_opacity,
-            prefs.desktop.widget_locked,
-        );
+        let _ = style_widget(&w, &prefs.desktop);
         *layout = previous;
         return Err(error);
     }
@@ -178,6 +168,13 @@ pub fn set_widget_layout(
 }
 fn internal(e: impl std::fmt::Display) -> AppError {
     AppError::internal(e)
+}
+/// Apply the widget's opacity/lock styling and keep the configured topmost state.
+/// Both can be lost when the extended window style is rewritten or when the
+/// startup apply runs before the widget window exists.
+fn style_widget(w: &tauri::WebviewWindow, prefs: &DesktopSettings) -> Result<(), AppError> {
+    native::widget_style(w, prefs.widget_opacity, prefs.widget_locked).map_err(internal)?;
+    native::ensure_topmost(w, prefs.widget_topmost).map_err(internal)
 }
 fn service(app: &AppHandle) -> Arc<LocalService> {
     app.state::<Arc<LocalService>>().inner().clone()
@@ -339,12 +336,7 @@ pub fn present(app: &AppHandle, label: &str) -> Result<(), AppError> {
     w.show().map_err(internal)?;
     if label == "widget" {
         let prefs = service(app).settings().map_err(AppError::service)?;
-        native::widget_style(
-            &w,
-            prefs.desktop.widget_opacity,
-            prefs.desktop.widget_locked,
-        )
-        .map_err(internal)?;
+        style_widget(&w, &prefs.desktop)?;
         super::lock_control::sync(app, &prefs.desktop)?;
     }
     if label != "widget"
