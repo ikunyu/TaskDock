@@ -115,19 +115,6 @@ html[data-window='widget'] #app {
   padding-top: 6px;
   border-top: 1px solid var(--border);
 }
-.widget-group-heading {
-  margin: 0 0 2px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-}
-.widget-week-group {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 4px;
-}
 .widget-week-group + .widget-week-group {
   margin-top: 6px;
 }
@@ -151,6 +138,13 @@ html[data-window='widget'] #app {
 .widget-week-dates {
   color: var(--muted);
   font-size: var(--widget-week-date-font, 10px);
+}
+/* A week without a 本周/下周 prefix shows only its range, so that range takes
+   the week heading role instead of looking like a caption. */
+.widget-week-dates:only-child {
+  color: var(--text);
+  font-size: var(--widget-week-font, 15px);
+  font-weight: 650;
 }
 .window-widget .task-compact {
   padding: 4px 0;

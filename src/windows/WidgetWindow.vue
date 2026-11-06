@@ -145,7 +145,6 @@ async function syncLayout() {
       ) +
       number(topStyle.columnGap) * 2;
     const gutter = panel.offsetWidth - panel.clientWidth;
-    const groupInset = futureWeeks.value.length ? 10 : 0;
     lastWidth = Math.min(
       180,
       Math.max(
@@ -153,7 +152,7 @@ async function syncLayout() {
         Math.ceil(
           number(css.paddingLeft) +
             number(css.paddingRight) +
-            Math.max(headerWidth, Math.max(titleWidth, weekWidth) + groupInset + gutter) +
+            Math.max(headerWidth, Math.max(titleWidth, weekWidth) + gutter) +
             2,
         ),
       ),
@@ -354,7 +353,6 @@ function resize(event: MouseEvent) {
             <TaskList :tasks="todayTasks" compact :minimal="!expanded" :inline-date="expanded" />
           </section>
           <section v-if="futureWeeks.length" class="widget-group" aria-label="未来">
-            <h2 class="widget-group-heading">未来</h2>
             <section
               v-for="week in futureWeeks"
               :key="week.start"
