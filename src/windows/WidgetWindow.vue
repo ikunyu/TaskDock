@@ -10,7 +10,6 @@ import { widgetTasks, isTimedOut } from '../domain/tasks';
 import { groupTaskWeeks, mondayOf, shiftDate, type TaskWeek } from '../domain/weeks';
 const app = useAppStore(),
   store = useTasksStore();
-const selectedView = ref<'today' | 'plan'>('today');
 const expanded = ref(false);
 const locking = ref(false);
 const fontStyle = computed(() => {
@@ -23,15 +22,10 @@ const fontStyle = computed(() => {
     '--widget-week-date-font': `${fonts.widgetWeekDateFontSize}px`,
   };
 });
-const activeView = computed(() => selectedView.value);
-const tabs = [
-  { id: 'today', label: '今日' },
-  { id: 'plan', label: '未来' },
-] as const;
-const tasks = computed(() => widgetTasks(store.tasks, store.today, store.now, activeView.value));
-const futureWeeks = computed(() =>
-  activeView.value === 'plan' ? groupTaskWeeks(tasks.value) : [],
-);
+const todayTasks = computed(() => widgetTasks(store.tasks, store.today, store.now, 'today'));
+const futureTasks = computed(() => widgetTasks(store.tasks, store.today, store.now, 'plan'));
+const futureWeeks = computed(() => groupTaskWeeks(futureTasks.value));
+const visibleTasks = computed(() => [...todayTasks.value, ...futureTasks.value]);
 function weekPrefix(week: TaskWeek) {
   const current = mondayOf(store.today);
   return week.start === current ? '本周' : week.start === shiftDate(current, 7) ? '下周' : '';
@@ -120,7 +114,7 @@ async function syncLayout() {
     };
     const titleElement = root.querySelector('.task-title') ?? body;
     let titleWidth = 0;
-    for (const task of tasks.value) {
+    for (const task of visibleTasks.value) {
       titleWidth = Math.max(
         titleWidth,
         textWidth(
@@ -142,8 +136,6 @@ async function syncLayout() {
         );
       }
     }
-    const tab = root.querySelector('.widget-tabs button');
-    const tabWidth = tab ? Math.max(...tabs.map((item) => textWidth(item.label, tab))) * 2 + 32 : 0;
     probe.textContent = '';
     const topStyle = getComputedStyle(top);
     const headerWidth =
@@ -161,7 +153,7 @@ async function syncLayout() {
         Math.ceil(
           number(css.paddingLeft) +
             number(css.paddingRight) +
-            Math.max(headerWidth, tabWidth, Math.max(titleWidth, weekWidth) + groupInset + gutter) +
+            Math.max(headerWidth, Math.max(titleWidth, weekWidth) + groupInset + gutter) +
             2,
         ),
       ),
@@ -187,7 +179,10 @@ async function syncLayout() {
     number(panelCss.borderBottomWidth);
   const fixedHeight =
     banners + controls + panelSpacing + number(css.paddingTop) + number(css.paddingBottom);
-  const limit = Math.min(600, Math.max(mode ? 320 : 280, Math.ceil(fixedHeight + 24)));
+  // Both modes size to the real content. The ceiling only stops a long list from
+  // growing past the screen work area; it is not a fixed window height.
+  const workArea = Math.round(((window.screen?.availHeight || 900) * 7) / 10);
+  const limit = Math.min(600, Math.max(workArea, Math.ceil(fixedHeight + 24)));
   lastHeight = Math.min(
     limit,
     Math.max(mode ? 120 : 72, Math.ceil(fixedHeight + body.scrollHeight + 2)),
@@ -215,9 +210,8 @@ async function syncLayout() {
 watch(
   [
     expanded,
-    tasks,
+    visibleTasks,
     fontStyle,
-    activeView,
     () => store.ready,
     () => app.ready,
     () => app.error,
@@ -242,22 +236,9 @@ onBeforeUnmount(() => {
   observer?.disconnect();
   clearTimeout(measureTimer);
 });
-function switchTab(event: KeyboardEvent) {
-  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || store.busy) return;
-  event.preventDefault();
-  selectedView.value =
-    event.key === 'Home'
-      ? 'today'
-      : event.key === 'End'
-        ? 'plan'
-        : selectedView.value === 'today'
-          ? 'plan'
-          : 'today';
-  (event.currentTarget as HTMLElement)
-    .querySelector<HTMLButtonElement>(`#widget-tab-${selectedView.value}`)
-    ?.focus();
-}
-const completed = computed(() => tasks.value.filter((task) => task.status === 'completed').length);
+const completed = computed(
+  () => todayTasks.value.filter((task) => task.status === 'completed').length,
+);
 const date = computed(() =>
   new Date(`${store.today}T12:00:00`).toLocaleDateString('zh-CN', {
     month: 'numeric',
@@ -313,7 +294,7 @@ function resize(event: MouseEvent) {
           v-if="expanded"
           variant="ghost"
           :disabled="store.refreshing"
-          :aria-label="activeView === 'today' ? '刷新今日任务' : '刷新未来事项'"
+          aria-label="刷新任务"
           @click="store.refresh()"
           >↻</AppButton
         >
@@ -347,71 +328,49 @@ function resize(event: MouseEvent) {
         >
       </div>
     </header>
-    <div class="widget-tabs" role="tablist" aria-label="悬浮任务范围" @keydown="switchTab">
-      <button
-        v-for="tab in tabs"
-        :id="`widget-tab-${tab.id}`"
-        :key="tab.id"
-        type="button"
-        role="tab"
-        :aria-selected="selectedView === tab.id"
-        aria-controls="widget-task-panel"
-        :tabindex="selectedView === tab.id ? 0 : -1"
-        :disabled="store.busy"
-        @click="selectedView = tab.id"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-    <div v-if="expanded && tasks.length" class="widget-summary">
-      <span>{{
-        selectedView === 'today'
-          ? `今日完成 ${completed}/${tasks.length}`
-          : `未来 ${tasks.length} 项`
-      }}</span
-      ><span v-if="selectedView === 'today'" class="muted"
-        >{{ tasks.length ? Math.round((completed / tasks.length) * 100) : 0 }}%</span
-      >
+    <div v-if="expanded && todayTasks.length" class="widget-summary">
+      <span>今日完成 {{ completed }}/{{ todayTasks.length }}</span
+      ><span class="muted">{{ Math.round((completed / todayTasks.length) * 100) }}%</span>
     </div>
     <progress
-      v-if="expanded && activeView === 'today' && tasks.length"
+      v-if="expanded && todayTasks.length"
       class="widget-progress"
       :value="completed"
-      :max="tasks.length || 1"
+      :max="todayTasks.length"
       aria-label="今日完成进度"
     />
     <div
       id="widget-task-panel"
       class="widget-scroll"
-      :class="{ 'has-tasks': tasks.length }"
-      role="tabpanel"
-      :aria-labelledby="`widget-tab-${activeView}`"
+      :class="{ 'has-tasks': visibleTasks.length }"
+      role="region"
+      aria-label="悬浮任务"
       tabindex="0"
     >
       <div ref="content" class="widget-content">
         <p v-if="!store.ready" class="muted small">正在读取任务…</p>
-        <template v-else-if="activeView === 'plan'">
-          <section
-            v-for="week in futureWeeks"
-            :key="week.start"
-            class="widget-week-group"
-            :aria-label="weekLabel(week)"
-          >
-            <h2>
-              <span v-if="weekPrefix(week)" class="widget-week-period">{{ weekPrefix(week) }}</span
-              ><span class="widget-week-dates">{{ weekRange(week) }}</span>
-            </h2>
-            <TaskList :tasks="week.tasks" compact :minimal="!expanded" :inline-date="expanded" />
+        <template v-else>
+          <section v-if="todayTasks.length" class="widget-group" aria-label="今日">
+            <TaskList :tasks="todayTasks" compact :minimal="!expanded" :inline-date="expanded" />
+          </section>
+          <section v-if="futureWeeks.length" class="widget-group" aria-label="未来">
+            <h2 class="widget-group-heading">未来</h2>
+            <section
+              v-for="week in futureWeeks"
+              :key="week.start"
+              class="widget-week-group"
+              :aria-label="weekLabel(week)"
+            >
+              <h2>
+                <span v-if="weekPrefix(week)" class="widget-week-period">{{
+                  weekPrefix(week)
+                }}</span
+                ><span class="widget-week-dates">{{ weekRange(week) }}</span>
+              </h2>
+              <TaskList :tasks="week.tasks" compact :minimal="!expanded" :inline-date="expanded" />
+            </section>
           </section>
         </template>
-        <TaskList
-          v-else-if="tasks.length"
-          :key="activeView"
-          :tasks="tasks"
-          compact
-          :minimal="!expanded"
-          :inline-date="expanded"
-        />
       </div>
     </div>
     <AppButton v-if="expanded" class="widget-add" @click="openQuick"

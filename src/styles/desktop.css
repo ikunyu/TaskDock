@@ -110,30 +110,18 @@ html[data-window='widget'] #app {
 .widget-header button {
   cursor: pointer;
 }
-.widget-tabs {
-  display: flex;
-  flex-shrink: 0;
-  gap: 4px;
-  padding: 2px;
-  margin: 4px 0;
-  border-radius: 8px;
-  background: var(--sidebar);
+.widget-group + .widget-group {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
 }
-.widget-tabs button {
-  flex: 1;
-  min-width: 0;
-  min-height: 24px;
-  padding: 3px 6px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
+.widget-group-heading {
+  margin: 0 0 2px;
   color: var(--muted);
-  font-size: 12px;
-}
-.widget-tabs button[aria-selected='true'] {
-  background: var(--accent-soft);
-  color: var(--accent);
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 .widget-week-group {
   border: 1px solid var(--border);
@@ -312,16 +300,6 @@ html[data-window='widget'] #app {
   white-space: nowrap;
 }
 
-.widget-collapsed .widget-tabs {
-  margin: 2px 0;
-  padding: 1px;
-  gap: 2px;
-}
-.widget-collapsed .widget-tabs button {
-  min-height: 22px;
-  padding: 1px 4px;
-  font-size: 11px;
-}
 .window-widget .mini-brand {
   gap: 5px;
 }

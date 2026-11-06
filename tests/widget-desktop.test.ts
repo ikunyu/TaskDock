@@ -46,7 +46,7 @@ describe('widget native interaction boundaries', () => {
   it('does not drag while using header buttons or non-left buttons', async () => {
     await wrapper.get('.widget-expand').trigger('click');
     wrapper
-      .get('button[aria-label="刷新今日任务"]')
+      .get('button[aria-label="刷新任务"]')
       .element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
     wrapper
       .get('.mini-brand')
