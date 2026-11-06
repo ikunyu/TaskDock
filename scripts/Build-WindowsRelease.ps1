@@ -4,7 +4,7 @@ $taskdockRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $taskdockRoot
 . (Join-Path $PSScriptRoot 'Use-LocalToolchain.ps1')
 $taskdockConfigPath = Join-Path $taskdockRoot 'release-config.json'
-$taskdockConfig = Get-Content -LiteralPath $taskdockConfigPath -Raw | ConvertFrom-Json
+$taskdockConfig = Get-Content -LiteralPath $taskdockConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
 if ($NextBuild) {
     $taskdockConfig.build = [long]$taskdockConfig.build + 1
     [System.IO.File]::WriteAllText($taskdockConfigPath, ($taskdockConfig | ConvertTo-Json) + "`n", [System.Text.UTF8Encoding]::new($false))

@@ -2,7 +2,9 @@ param([switch]$Draft)
 $ErrorActionPreference = 'Stop'
 $taskdockRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $taskdockRoot
-$taskdockConfig = Get-Content -LiteralPath 'release-config.json' -Raw | ConvertFrom-Json
+# -Encoding utf8 is explicit: Windows PowerShell 5.1 otherwise decodes as ANSI,
+# which corrupts the UTF-8 release notes inside latest.json.
+$taskdockConfig = Get-Content -LiteralPath 'release-config.json' -Raw -Encoding utf8 | ConvertFrom-Json
 if ($taskdockConfig.repository -ne 'ikunyu/TaskDock') { throw 'Unexpected repository' }
 $taskdockGh = Join-Path $taskdockRoot '.tools/github-cli/bin/gh.exe'
 if (-not (Test-Path -LiteralPath $taskdockGh)) { $taskdockGh = (Get-Command gh -ErrorAction Stop).Source }
@@ -13,7 +15,7 @@ if (-not $env:HTTPS_PROXY) {
 }
 & $taskdockGh auth status --hostname github.com
 if ($LASTEXITCODE -ne 0) { throw 'Sign in with gh auth login first. Never embed GitHub tokens in the app.' }
-$taskdockManifest = Get-Content -LiteralPath 'artifacts/release/latest.json' -Raw | ConvertFrom-Json
+$taskdockManifest = Get-Content -LiteralPath 'artifacts/release/latest.json' -Raw -Encoding utf8 | ConvertFrom-Json
 if ($taskdockManifest.version -ne "1.0.0+$($taskdockConfig.build)") { throw 'Build and release manifest differ' }
 if ($taskdockManifest.appVersion -ne $taskdockConfig.appVersion) { throw 'Application and release manifest differ' }
 & node (Join-Path $PSScriptRoot 'verify-update.mjs')
