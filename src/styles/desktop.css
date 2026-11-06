@@ -122,12 +122,12 @@ html[data-window='widget'] #app {
 .window-widget .widget-layout:not(.widget-collapsed) .widget-group .task-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  gap: 3px;
 }
 .window-widget .widget-layout:not(.widget-collapsed) .task-compact {
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 4px 6px;
+  padding: 1px 6px;
 }
 /* Collapsed: groups are split by a rule and tasks only by spacing. */
 .widget-collapsed .widget-group + .widget-group {
@@ -154,17 +154,6 @@ html[data-window='widget'] #app {
   overflow-wrap: anywhere;
 }
 .widget-group-title {
-  font-size: var(--widget-week-font, 15px);
-  font-weight: 650;
-}
-.widget-week-dates {
-  color: var(--muted);
-  font-size: var(--widget-week-date-font, 10px);
-}
-/* A week without a 本周/下周 prefix shows only its range, so that range takes
-   the heading role instead of looking like a caption. */
-.widget-week-dates:only-child {
-  color: var(--text);
   font-size: var(--widget-week-font, 15px);
   font-weight: 650;
 }

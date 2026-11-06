@@ -7,7 +7,6 @@ import { bridge } from '../services/bridge';
 import { useAppStore } from '../stores/app';
 import { useTasksStore } from '../stores/tasks';
 import { widgetTasks, isTimedOut } from '../domain/tasks';
-import { groupTaskWeeks, mondayOf, shiftDate, type TaskWeek } from '../domain/weeks';
 const app = useAppStore(),
   store = useTasksStore();
 const expanded = ref(false);
@@ -24,22 +23,7 @@ const fontStyle = computed(() => {
 });
 const todayTasks = computed(() => widgetTasks(store.tasks, store.today, store.now, 'today'));
 const futureTasks = computed(() => widgetTasks(store.tasks, store.today, store.now, 'plan'));
-const futureWeeks = computed(() => groupTaskWeeks(futureTasks.value));
 const visibleTasks = computed(() => [...todayTasks.value, ...futureTasks.value]);
-function weekPrefix(week: TaskWeek) {
-  const current = mondayOf(store.today);
-  return week.start === current ? '本周' : week.start === shiftDate(current, 7) ? '下周' : '';
-}
-function weekRange(week: TaskWeek) {
-  const showYear =
-    week.start.slice(0, 4) !== store.today.slice(0, 4) ||
-    week.end.slice(0, 4) !== week.start.slice(0, 4);
-  const format = (date: string) => (showYear ? date : date.slice(5)).replaceAll('-', '.');
-  return `${format(week.start)}–${format(week.end)}`;
-}
-function weekLabel(week: TaskWeek) {
-  return `${weekPrefix(week)} ${weekRange(week)}`.trim();
-}
 const surface = ref<HTMLElement>(),
   header = ref<HTMLElement>(),
   content = ref<HTMLElement>(),
@@ -123,19 +107,6 @@ async function syncLayout() {
         ),
       );
     }
-    let weekWidth = 0;
-    const period = root.querySelector('.widget-group-title'),
-      dates = root.querySelector('.widget-week-dates');
-    if (dates) {
-      for (const week of futureWeeks.value) {
-        const prefix = weekPrefix(week);
-        weekWidth = Math.max(
-          weekWidth,
-          textWidth(weekRange(week), dates) +
-            (prefix && period ? textWidth(prefix, period) + 4 : 0),
-        );
-      }
-    }
     probe.textContent = '';
     const topStyle = getComputedStyle(top);
     const headerWidth =
@@ -152,7 +123,7 @@ async function syncLayout() {
         Math.ceil(
           number(css.paddingLeft) +
             number(css.paddingRight) +
-            Math.max(headerWidth, Math.max(titleWidth, weekWidth) + gutter) +
+            Math.max(headerWidth, titleWidth + gutter) +
             2,
         ),
       ),
@@ -355,17 +326,11 @@ function resize(event: MouseEvent) {
             </h2>
             <TaskList :tasks="todayTasks" compact :minimal="!expanded" :inline-date="expanded" />
           </section>
-          <section
-            v-for="week in futureWeeks"
-            :key="week.start"
-            class="widget-group"
-            :aria-label="weekLabel(week)"
-          >
+          <section v-if="futureTasks.length" class="widget-group" aria-label="未来">
             <h2 class="widget-group-heading">
-              <span v-if="weekPrefix(week)" class="widget-group-title">{{ weekPrefix(week) }}</span
-              ><span class="widget-week-dates">{{ weekRange(week) }}</span>
+              <span class="widget-group-title">未来</span>
             </h2>
-            <TaskList :tasks="week.tasks" compact :minimal="!expanded" :inline-date="expanded" />
+            <TaskList :tasks="futureTasks" compact :minimal="!expanded" :inline-date="expanded" />
           </section>
         </template>
       </div>
