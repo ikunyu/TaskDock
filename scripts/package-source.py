@@ -13,7 +13,7 @@ output.mkdir(parents=True, exist_ok=True)
 archive = output / f'TaskDock-{version}-source.zip'
 folders = ['src', 'src-tauri', 'scripts', 'tests', 'docs', '.github']
 root_files = [
-    'release-config.json', 'release-notes.md', 'README.md', 'CONTRIBUTING.md', 'package.json', 'package-lock.json', 'index.html', 'widget-lock.html',
+    'release-config.json', 'release-notes.md', 'README.md', 'CONTRIBUTING.md', 'HANDOFF.md', 'package.json', 'package-lock.json', 'index.html', 'widget-lock.html',
     'tsconfig.json', 'vite.config.ts', '.editorconfig', '.gitattributes',
     '.gitignore', '.prettierignore', '.prettierrc.json',
 ]

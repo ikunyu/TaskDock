@@ -79,6 +79,7 @@ npm run tauri -- build --no-bundle
 
 ## 文档
 
+- [项目交接文档：迁移开发环境、现状、签名发布与待验证项](HANDOFF.md)
 - [当前功能总览：11 大模块、63 项功能与基础能力](docs/feature-summary.md)
 - [需求与阶段边界](docs/requirements.md)
 - [架构与安全](docs/architecture.md)
