@@ -53,6 +53,12 @@ let layoutQueue = Promise.resolve(),
 let requestedKey = '',
   lastWidth = 160,
   lastHeight = 54;
+// Last layout that actually reached the native window, used to stop a resize
+// that feeds back into the measurement from oscillating.
+let appliedMode = false,
+  appliedHeight = 0,
+  previousHeight = -1,
+  appliedAt = 0;
 let measureTimer: ReturnType<typeof setTimeout> | undefined;
 let observer: ResizeObserver | undefined;
 function scheduleLayout() {
@@ -158,6 +164,19 @@ async function syncLayout() {
   );
   const key = mode ? `expanded:${lastHeight}` : `${lastWidth}:${lastHeight}`;
   if (key === requestedKey) return;
+  // Anti-flap: when a native resize feeds back into the measurement, some
+  // environments alternate between two neighbouring heights forever. Keep the
+  // height that is already applied instead of chasing the oscillation, and
+  // ignore the few pixels of noise that cannot change what is visible.
+  const stamp = performance.now();
+  if (
+    mode === appliedMode &&
+    ((lastHeight === previousHeight && lastHeight !== appliedHeight && stamp - appliedAt < 2000) ||
+      (lastHeight !== appliedHeight && Math.abs(lastHeight - appliedHeight) < 3))
+  ) {
+    requestedKey = key;
+    return;
+  }
   requestedKey = key;
   const request = ++layoutRequest,
     width = lastWidth,
@@ -167,6 +186,10 @@ async function syncLayout() {
     try {
       await bridge.widgetLayout(mode, width, height);
       nativeExpanded = mode;
+      appliedMode = mode;
+      previousHeight = appliedHeight;
+      appliedHeight = height;
+      appliedAt = performance.now();
     } catch (error) {
       if (!disposed && request === layoutRequest) {
         requestedKey = '';
