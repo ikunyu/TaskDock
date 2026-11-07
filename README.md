@@ -2,13 +2,13 @@
 
 面向 Windows 10/11 的本地桌面待办工作台。技术栈：Tauri v2、Vue 3、TypeScript、Pinia、Rust、SQLite。
 
-当前版本 **1.2.0 / Windows Release 与 NSIS 安装包**。支持任务创建、编辑、完成与撤销、确认后永久删除，任务工作区、心愿单、分类、计划与截止、优先级和子任务。主窗口、默认宽200、高度按内容调整的悬浮窗口及快速输入窗口共用 Rust LocalService 与 SQLite，事务提交后以 revision 事件同步。保留第一阶段明暗主题、受限 IPC、迁移和日志错误处理。
+当前版本 **1.2.1 / Windows Release 与 NSIS 安装包**。支持任务创建、编辑、完成与撤销、确认后永久删除，任务工作区、心愿单、分类、计划与截止、优先级和子任务。主窗口、默认宽200、高度按内容调整的悬浮窗口及快速输入窗口共用 Rust LocalService 与 SQLite，事务提交后以 revision 事件同步。保留第一阶段明暗主题、受限 IPC、迁移和日志错误处理。
 
 新增系统托盘、全局快捷键、悬浮窗拖动缩放/透明度/置顶、窗口状态记忆、工作区恢复、开机启动及单实例。默认关闭主窗口隐藏到托盘，托盘或软件设置可显式退出。
 
 ## 安装
 
-Windows x64安装包见 `src-tauri/target/release/bundle/nsis/TaskDock_1.2.0_x64-setup.exe`，主程序见 `src-tauri/target/release/taskdock.exe`。当前用户安装，缺少WebView2时需联网安装运行时；本版未签名，尚未执行安装或功能验收。详见[安装与使用说明](docs/installation.md)。
+Windows x64安装包见 `src-tauri/target/release/bundle/nsis/TaskDock_1.2.1_x64-setup.exe`，主程序见 `src-tauri/target/release/taskdock.exe`。当前用户安装，缺少WebView2时需联网安装运行时；本版未签名，尚未执行安装或功能验收。详见[安装与使用说明](docs/installation.md)。
 
 ## 使用
 
@@ -97,7 +97,7 @@ npm run tauri -- build --no-bundle
 - [第二阶段实施基线](docs/stage-2-plan.md)
 - [第二阶段验收报告](docs/stage-2-report.md)
 
-当前交付为1.2.0源码、Release主程序及NSIS安装包；迁移目标为Schema8（悬浮窗锁定与不透明度）。本阶段没有启动或安装软件、执行测试、打开或升级真实数据库。构建成功不表示全部功能通过验收，数据恢复/通知/多屏等风险详见第六阶段报告。交付后停止。
+当前交付为1.2.1源码、Release主程序及NSIS安装包；迁移目标为Schema8（悬浮窗锁定与不透明度）。本阶段没有启动或安装软件、执行测试、打开或升级真实数据库。构建成功不表示全部功能通过验收，数据恢复/通知/多屏等风险详见第六阶段报告。交付后停止。
 
 1.0.0 修复月历日期任务列表、搜索及 CSV 导出共用查询中的 SQL 括号错误，并调整通用错误提示。详见 [修复说明](docs/calendar-fix-report.md)。
 
@@ -113,4 +113,4 @@ npm run tauri -- build --no-bundle
 
 数据跟随软件文件夹保存：请将TaskDock放在F、D等非C盘可写目录，或安装时选择该目录；如果软件仍装在C盘，数据也会跟随保存在C盘。首次启动时若新data目录无库，会用SQLite一致性快照迁入旧AppData数据库及备份并保留原文件；已有新目录数据库不覆盖。设置 → 数据管理可查看实际数据目录。移动软件或带任务到其他设备时，先托盘退出，再复制整个软件文件夹（至少含EXE与data），不能只复制EXE。
 
-GitHub更新：启动后自动检查ikunyu/TaskDock的新构建，也可在软件设置 → 关于与运行状态 → 检查更新。下载并验证后，再点击“安装并重启”，先保存所有窗口的草稿。当前软件版本为1.2.0；为兼容已安装的1.0.0更新器，更新协议继续使用1.0.0+内部构建号及原安装包下载别名，内部构建号单独递增。旧设备需先安装一次支持更新的本版本。维护者发布步骤和签名密钥保管见[GitHub更新说明](docs/github-updates.md)。
+GitHub更新：启动后自动检查ikunyu/TaskDock的新构建，也可在软件设置 → 关于与运行状态 → 检查更新。下载并验证后，再点击“安装并重启”，先保存所有窗口的草稿。当前软件版本为1.2.1；为兼容已安装的1.0.0更新器，更新协议继续使用1.0.0+内部构建号及原安装包下载别名，内部构建号单独递增。旧设备需先安装一次支持更新的本版本。维护者发布步骤和签名密钥保管见[GitHub更新说明](docs/github-updates.md)。

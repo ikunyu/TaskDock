@@ -21,7 +21,7 @@ export const useAppStore = defineStore('app', () => {
   const theme = ref<ThemePreference>('system');
   const revision = ref(-1);
   const schemaVersion = ref(0);
-  const appVersion = ref('1.2.0');
+  const appVersion = ref('1.2.1');
   const ready = ref(false);
   const error = ref<AppError | null>(null);
   const busy = ref(false);
