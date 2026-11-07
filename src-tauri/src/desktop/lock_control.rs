@@ -117,7 +117,7 @@ pub fn sync(app: &AppHandle, prefs: &DesktopSettings) -> Result<(), AppError> {
         ))
         .map_err(AppError::internal)?;
     window
-        .set_always_on_top(prefs.widget_topmost)
+        .set_always_on_top(super::runtime::topmost_value(app, prefs))
         .map_err(AppError::internal)?;
     window.show().map_err(AppError::internal)?;
     native::lock_control_style(&window).map_err(AppError::internal)

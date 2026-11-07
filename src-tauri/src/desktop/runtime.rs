@@ -35,6 +35,9 @@ pub struct DesktopRuntime {
     pub restoring: AtomicBool,
     widget_locked: AtomicBool,
     widget_layout: Mutex<WidgetLayout>,
+    /// Set while a full-screen application owns the foreground; the widget then
+    /// gives up its topmost slot instead of floating over video or a game.
+    fullscreen: AtomicBool,
 }
 #[derive(Clone)]
 struct WidgetLayout {
@@ -158,10 +161,10 @@ pub fn set_widget_layout(
     let at = safe.as_ref().map(|p| (p.x, p.y));
     let prefs = service(app).settings().map_err(AppError::service)?;
     let operation =
-        apply_widget_layout(&w, &next, at).and_then(|_| style_widget(&w, &prefs.desktop));
+        apply_widget_layout(&w, &next, at).and_then(|_| style_widget(app, &w, &prefs.desktop));
     if let Err(error) = operation {
         let _ = apply_widget_layout(&w, &previous, Some((position.x, position.y)));
-        let _ = style_widget(&w, &prefs.desktop);
+        let _ = style_widget(app, &w, &prefs.desktop);
         *layout = previous;
         return Err(error);
     }
@@ -172,12 +175,72 @@ pub fn set_widget_layout(
 fn internal(e: impl std::fmt::Display) -> AppError {
     AppError::internal(e)
 }
+pub fn fullscreen_active(app: &AppHandle) -> bool {
+    app.state::<DesktopRuntime>()
+        .fullscreen
+        .load(Ordering::SeqCst)
+}
+/// The topmost value the widget should actually have right now: the saved
+/// preference, minus the temporary suppression while another app is full screen.
+pub fn topmost_value(app: &AppHandle, prefs: &DesktopSettings) -> bool {
+    prefs.widget_topmost && !fullscreen_active(app)
+}
+/// Apply the full-screen state and only touch the widget when it flips.
+fn apply_fullscreen(app: &AppHandle, active: bool) {
+    let rt = app.state::<DesktopRuntime>();
+    if rt.fullscreen.swap(active, Ordering::SeqCst) == active {
+        return;
+    }
+    if let Ok(prefs) = service(app).settings() {
+        let _gate = rt.gate.lock();
+        if let Some(w) = app.get_webview_window("widget") {
+            let topmost = prefs.desktop.widget_topmost && !active;
+            if let Err(e) = native::ensure_topmost(&w, topmost) {
+                log::warn!("widget topmost update failed: {e}");
+            }
+        }
+        if let Err(e) = super::lock_control::sync(app, &prefs.desktop) {
+            log::warn!("widget lock sync failed: {}", e.message);
+        }
+    }
+}
+/// Windows tells us when the foreground window changes or a window is resized or
+/// moved, so no timer is needed: the watcher sleeps in a channel receive and the
+/// state is read once per burst of events.
+fn watch_fullscreen(app: AppHandle) {
+    std::thread::spawn(move || {
+        let events = native::fullscreen_events();
+        // A full-screen app may already be running when TaskDock starts.
+        apply_fullscreen(&app, native::fullscreen_foreground());
+        loop {
+            if events.recv().is_err() {
+                return;
+            }
+            // Coalesce the burst and let a resize finish before reading state.
+            while events.try_recv().is_ok() {}
+            std::thread::sleep(Duration::from_millis(150));
+            while events.try_recv().is_ok() {}
+            if app
+                .state::<DesktopRuntime>()
+                .quitting
+                .load(Ordering::SeqCst)
+            {
+                return;
+            }
+            apply_fullscreen(&app, native::fullscreen_foreground());
+        }
+    });
+}
 /// Apply the widget's opacity/lock styling and keep the configured topmost state.
 /// Both can be lost when the extended window style is rewritten or when the
 /// startup apply runs before the widget window exists.
-fn style_widget(w: &tauri::WebviewWindow, prefs: &DesktopSettings) -> Result<(), AppError> {
+fn style_widget(
+    app: &AppHandle,
+    w: &tauri::WebviewWindow,
+    prefs: &DesktopSettings,
+) -> Result<(), AppError> {
     native::widget_style(w, prefs.widget_opacity, prefs.widget_locked).map_err(internal)?;
-    native::ensure_topmost(w, prefs.widget_topmost).map_err(internal)
+    native::ensure_topmost(w, topmost_value(app, prefs)).map_err(internal)
 }
 fn service(app: &AppHandle) -> Arc<LocalService> {
     app.state::<Arc<LocalService>>().inner().clone()
@@ -339,7 +402,7 @@ pub fn present(app: &AppHandle, label: &str) -> Result<(), AppError> {
     w.show().map_err(internal)?;
     if label == "widget" {
         let prefs = service(app).settings().map_err(AppError::service)?;
-        style_widget(&w, &prefs.desktop)?;
+        style_widget(app, &w, &prefs.desktop)?;
         super::lock_control::sync(app, &prefs.desktop)?;
     }
     if label != "widget"
@@ -359,7 +422,8 @@ fn apply_widget(app: &AppHandle, p: &DesktopSettings) -> Result<(), AppError> {
     let w = app
         .get_webview_window("widget")
         .ok_or_else(|| internal("widget missing"))?;
-    w.set_always_on_top(p.widget_topmost).map_err(internal)?;
+    w.set_always_on_top(topmost_value(app, p))
+        .map_err(internal)?;
     if p.widget_visible {
         w.show().map_err(internal)?;
     } else {
@@ -632,6 +696,7 @@ pub fn shortcut_pressed(app: &AppHandle, shortcut: &Shortcut) {
     }
 }
 pub fn initialize(app: AppHandle, background: bool) {
+    watch_fullscreen(app.clone());
     std::thread::spawn(move || {
         let rt = app.state::<DesktopRuntime>();
         let settings = {
