@@ -100,7 +100,7 @@ pub fn fullscreen_foreground() -> bool {
             },
             WindowsAndMessaging::{
                 GetClassNameW, GetForegroundWindow, GetWindowLongW, GetWindowRect,
-                GetWindowThreadProcessId, GWL_STYLE, WS_CAPTION,
+                GetWindowThreadProcessId, GWL_STYLE, WS_CAPTION, WS_MAXIMIZE,
             },
         },
     };
@@ -157,12 +157,46 @@ pub fn fullscreen_foreground() -> bool {
             && rect.right >= info.rcMonitor.right
             && rect.bottom >= info.rcMonitor.bottom)
         {
+            // A full-screen game that switches the display mode can report a
+            // smaller window rect. Record the one case worth diagnosing, once per
+            // window, so a missed game can be identified from the log.
+            let monitor_width = info.rcMonitor.right - info.rcMonitor.left;
+            let monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
+            let mostly = (rect.right - rect.left) * 10 >= monitor_width * 8
+                && (rect.bottom - rect.top) * 10 >= monitor_height * 8;
+            static HINTED: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+            if mostly
+                && HINTED.swap(hwnd as isize, std::sync::atomic::Ordering::Relaxed) != hwnd as isize
+            {
+                log::info!(
+                    "fullscreen check: {class} covers {}/{} x {}/{} of the monitor, window {}x{} at {},{}, style {:#x}",
+                    rect.right - rect.left,
+                    monitor_width,
+                    rect.bottom - rect.top,
+                    monitor_height,
+                    rect.right - rect.left,
+                    rect.bottom - rect.top,
+                    rect.left,
+                    rect.top,
+                    GetWindowLongW(hwnd, GWL_STYLE)
+                );
+            }
             return false;
         }
-        // A maximized window keeps its caption and, with an auto-hide taskbar,
-        // covers the monitor exactly like a full-screen app does.
-        let style = GetWindowLongW(hwnd, GWL_STYLE);
-        (style as u32 & WS_CAPTION) == 0
+        // A borderless full-screen game usually keeps WS_CAPTION and only lets
+        // DWM hide the frame, while a normal window that sits on the monitor
+        // because the taskbar auto-hides is a maximized window. Use that to tell
+        // them apart instead of requiring the caption to be gone.
+        let style = GetWindowLongW(hwnd, GWL_STYLE) as u32;
+        let caption = style & WS_CAPTION != 0;
+        let maximized = style & WS_MAXIMIZE != 0;
+        if caption && maximized {
+            log::info!(
+                "widget stayed on top: covering window is maximized with a frame (class {class})"
+            );
+            return false;
+        }
+        true
     }
 }
 #[cfg(not(windows))]
