@@ -152,20 +152,25 @@ pub fn fullscreen_foreground() -> bool {
         if GetMonitorInfoW(monitor, &mut info) == 0 {
             return false;
         }
+        let style = GetWindowLongW(hwnd, GWL_STYLE) as u32;
+        let caption = style & WS_CAPTION != 0;
+        let maximized = style & WS_MAXIMIZE != 0;
         if !(rect.left <= info.rcMonitor.left
             && rect.top <= info.rcMonitor.top
             && rect.right >= info.rcMonitor.right
             && rect.bottom >= info.rcMonitor.bottom)
         {
             // A full-screen game that switches the display mode can report a
-            // smaller window rect. Record the one case worth diagnosing, once per
-            // window, so a missed game can be identified from the log.
+            // window rect smaller than the monitor. Only that shape is worth one
+            // diagnostic line; a normal maximized or resized window lands here
+            // all the time and stays silent.
             let monitor_width = info.rcMonitor.right - info.rcMonitor.left;
             let monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
-            let mostly = (rect.right - rect.left) * 10 >= monitor_width * 8
-                && (rect.bottom - rect.top) * 10 >= monitor_height * 8;
+            let nearly = (rect.right - rect.left) * 10 >= monitor_width * 9
+                && (rect.bottom - rect.top) * 10 >= monitor_height * 9;
             static HINTED: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
-            if mostly
+            if nearly
+                && !maximized
                 && HINTED.swap(hwnd as isize, std::sync::atomic::Ordering::Relaxed) != hwnd as isize
             {
                 log::info!(
@@ -178,7 +183,7 @@ pub fn fullscreen_foreground() -> bool {
                     rect.bottom - rect.top,
                     rect.left,
                     rect.top,
-                    GetWindowLongW(hwnd, GWL_STYLE)
+                    style
                 );
             }
             return false;
@@ -187,16 +192,7 @@ pub fn fullscreen_foreground() -> bool {
         // DWM hide the frame, while a normal window that sits on the monitor
         // because the taskbar auto-hides is a maximized window. Use that to tell
         // them apart instead of requiring the caption to be gone.
-        let style = GetWindowLongW(hwnd, GWL_STYLE) as u32;
-        let caption = style & WS_CAPTION != 0;
-        let maximized = style & WS_MAXIMIZE != 0;
-        if caption && maximized {
-            log::info!(
-                "widget stayed on top: covering window is maximized with a frame (class {class})"
-            );
-            return false;
-        }
-        true
+        !(caption && maximized)
     }
 }
 #[cfg(not(windows))]
