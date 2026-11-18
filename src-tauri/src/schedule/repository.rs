@@ -314,61 +314,93 @@ pub fn cancel_inactive(tx: &Transaction<'_>) -> Result<(), ServiceError> {
     tx.execute("UPDATE reminders SET state='cancelled' WHERE state IN('pending','notified') AND task_id IN(SELECT id FROM tasks WHERE status<>'pending' OR deleted_at IS NOT NULL)",[])?;
     Ok(())
 }
-fn horizon(template: &TaskDraft) -> Result<NaiveDate, ServiceError> {
-    let today = Local::now().date_naive();
-    let start = date(
-        template
-            .planned_date
-            .as_deref()
-            .ok_or(ServiceError::InvalidSettings)?,
+fn today_date() -> NaiveDate {
+    Local::now().date_naive()
+}
+/// Recurring tasks keep a single live occurrence: the current cycle. The next one
+/// is materialized on the day it starts, so the future list never fills with
+/// pre-generated copies.
+fn horizon() -> NaiveDate {
+    today_date()
+}
+/// Soft-delete every pending occurrence of the series except the current one and
+/// drop its schedule key, so the date can be generated again when it arrives.
+/// Older occurrences are kept as tombstones; completed ones are never touched.
+fn supersede_pending(
+    tx: &Transaction<'_>,
+    series_id: &str,
+    today: &str,
+    start: NaiveDate,
+) -> Result<(), ServiceError> {
+    let mut q = tx.prepare(
+        "SELECT t.id,s.occurrence_date FROM task_schedule s JOIN tasks t ON t.id=s.task_id \
+         WHERE s.series_id=?1 AND t.status='pending' AND t.deleted_at IS NULL \
+         ORDER BY s.occurrence_date",
     )?;
-    let mut earliest = start;
-    if let Some(c) = &template.schedule {
-        if let Some(at) = &c.at {
-            earliest = earliest.min(instant(at)?.with_timezone(&Local).date_naive());
-        }
-        if c.at_deadline || !c.before_minutes.is_empty() {
-            let due = template
-                .due_at
-                .as_deref()
-                .map(|t| instant(t).map(|t| t.with_timezone(&Local).date_naive()))
-                .transpose()?
-                .or(template
-                    .due_date
-                    .as_deref()
-                    .or(template.planned_date.as_deref())
-                    .map(date)
-                    .transpose()?);
-            if let Some(d) = due {
-                earliest = earliest.min(
-                    d.checked_sub_signed(Duration::days(if c.before_minutes.contains(&1440) {
-                        1
-                    } else {
-                        0
-                    }))
-                    .ok_or(ServiceError::Validation("提前提醒超出日期范围。"))?,
-                );
-            }
-        }
+    let rows = q
+        .query_map([series_id], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+    if rows.is_empty() {
+        return Ok(());
     }
-    let lead = 32.max((start - earliest).num_days() + 2);
-    Ok(today
-        .checked_add_signed(Duration::days(lead))
-        .unwrap_or(NaiveDate::MAX)
-        .min(NaiveDate::from_ymd_opt(9999, 12, 31).ok_or(ServiceError::InvalidSettings)?))
+    // Keep the newest occurrence that has already started. A series that has not
+    // started yet keeps its first occurrence; otherwise every leftover ahead of
+    // today is dropped and re-created on its own day.
+    let keep = rows
+        .iter()
+        .filter(|(_, day)| day.as_str() <= today)
+        .map(|(_, day)| day.clone())
+        .max()
+        .or_else(|| {
+            if start.to_string().as_str() > today {
+                rows.first().map(|(_, day)| day.clone())
+            } else {
+                None
+            }
+        });
+    for (id, day) in rows {
+        if keep.as_deref() == Some(day.as_str()) {
+            continue;
+        }
+        tx.execute(
+            "UPDATE tasks SET deleted_at=?1,updated_at=?1,version=version+1 WHERE id=?2",
+            params![validation::now(), id],
+        )?;
+        tx.execute("DELETE FROM task_schedule WHERE task_id=?1", [&id])?;
+        tx.execute(
+            "UPDATE reminders SET state='cancelled' WHERE task_id=?1 AND state IN('pending','notified')",
+            [&id],
+        )?;
+        tasks::repository::schedule_audit(tx, &id, "recurrence_supersede", None)?;
+    }
+    Ok(())
 }
 pub fn generation_needed(c: &Connection) -> Result<bool, ServiceError> {
-    let mut q =
-        c.prepare("SELECT cursor_date,template_json FROM recurrence_series WHERE active=1")?;
-    for row in q.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))? {
-        let (cursor, template) = row?;
-        if date(&cursor)? < horizon(&serde_json::from_str(&template)?)? {
+    let today = today_date();
+    let mut q = c.prepare("SELECT cursor_date FROM recurrence_series WHERE active=1")?;
+    for cursor in q.query_map([], |r| r.get::<_, String>(0))? {
+        if date(&cursor?)? < today {
             return Ok(true);
         }
     }
-    Ok(false)
+    // A series still holding several live occurrences, or one generated ahead of
+    // today by an older build, needs the reconcile pass in generate().
+    let stale: bool = c.query_row(
+        "SELECT EXISTS(SELECT 1 FROM task_schedule s JOIN tasks t ON t.id=s.task_id \
+         JOIN recurrence_series r ON r.id=s.series_id \
+         WHERE s.series_id IS NOT NULL AND t.status='pending' AND t.deleted_at IS NULL \
+         GROUP BY s.series_id \
+         HAVING COUNT(*)>1 OR (MAX(s.occurrence_date)>?1 AND MIN(r.start_date)<=?1))",
+        [&today.to_string()],
+        |r| r.get(0),
+    )?;
+    Ok(stale)
 }
 pub fn generate(tx: &Transaction<'_>) -> Result<(), ServiceError> {
+    let today = today_date();
+    let today_text = today.to_string();
     let mut q=tx.prepare("SELECT id,rule_json,template_json,start_date,cursor_date,end_date,exclusions_json FROM recurrence_series WHERE active=1 ORDER BY cursor_date,id")?;
     let rows = q
         .query_map([], |r| {
@@ -389,73 +421,77 @@ pub fn generate(tx: &Transaction<'_>) -> Result<(), ServiceError> {
         let exclusions: Vec<String> = serde_json::from_str(&exclusions)?;
         let rule: Recurrence = serde_json::from_str(&rule)?;
         let template: TaskDraft = serde_json::from_str(&template)?;
-        let horizon = horizon(&template)?;
         let start = date(&start)?;
         let mut day = date(&cursor)?;
-        if day >= horizon {
-            continue;
+        // Never generate ahead. A cursor left past today by a previous build is
+        // wound back to yesterday so today's occurrence can still be created.
+        if day > today {
+            day = start.max(today.pred_opt().unwrap_or(today));
         }
-        processed += 1;
-        for _ in 0..366 {
-            let Some(next) = day.succ_opt() else { break };
-            if next > horizon {
-                break;
-            }
-            if end.as_ref().is_some_and(|s| next.to_string() > *s) {
-                tx.execute("UPDATE recurrence_series SET active=0 WHERE id=?1", [&sid])?;
-                break;
-            }
-            day = next;
-            if matches(&rule, start, day) && !exclusions.contains(&day.to_string()) {
-                let exists:bool=tx.query_row("SELECT EXISTS(SELECT 1 FROM task_schedule WHERE series_id=?1 AND occurrence_date=?2)",params![sid,day.to_string()],|r|r.get(0))?;
-                if !exists {
-                    let mut draft = template.clone();
-                    let days = (day - start).num_days();
-                    draft.planned_date = Some(day.to_string());
-                    draft.due_date = template
-                        .due_date
-                        .as_deref()
-                        .map(|s| {
-                            date(s)
-                                .and_then(|d| {
-                                    d.checked_add_signed(Duration::days(days))
-                                        .ok_or(ServiceError::Validation("截止日期超出范围。"))
-                                })
-                                .map(|d| d.to_string())
-                        })
-                        .transpose()?;
-                    draft.due_at = template
-                        .due_at
-                        .as_deref()
-                        .map(|s| shift_time(s, days))
-                        .transpose()?;
-                    if let Some(c) = &mut draft.schedule {
-                        c.at = c.at.as_deref().map(|s| shift_time(s, days)).transpose()?;
-                        c.recurrence = None;
-                    }
-                    // Do not recreate a deleted category from a stored template.
-                    if let Some(cat) = &draft.category_id {
-                        let exists: bool = tx.query_row(
-                            "SELECT EXISTS(SELECT 1 FROM categories WHERE id=?1)",
-                            [cat],
-                            |r| r.get(0),
-                        )?;
-                        if !exists {
-                            draft.category_id = None;
+        if day < horizon() {
+            processed += 1;
+            for _ in 0..366 {
+                let Some(next) = day.succ_opt() else { break };
+                if next > today {
+                    break;
+                }
+                if end.as_ref().is_some_and(|s| next.to_string() > *s) {
+                    tx.execute("UPDATE recurrence_series SET active=0 WHERE id=?1", [&sid])?;
+                    break;
+                }
+                day = next;
+                if matches(&rule, start, day) && !exclusions.contains(&day.to_string()) {
+                    let exists:bool=tx.query_row("SELECT EXISTS(SELECT 1 FROM task_schedule WHERE series_id=?1 AND occurrence_date=?2)",params![sid,day.to_string()],|r|r.get(0))?;
+                    if !exists {
+                        let mut draft = template.clone();
+                        let days = (day - start).num_days();
+                        draft.planned_date = Some(day.to_string());
+                        draft.due_date = template
+                            .due_date
+                            .as_deref()
+                            .map(|s| {
+                                date(s)
+                                    .and_then(|d| {
+                                        d.checked_add_signed(Duration::days(days))
+                                            .ok_or(ServiceError::Validation("截止日期超出范围。"))
+                                    })
+                                    .map(|d| d.to_string())
+                            })
+                            .transpose()?;
+                        draft.due_at = template
+                            .due_at
+                            .as_deref()
+                            .map(|s| shift_time(s, days))
+                            .transpose()?;
+                        if let Some(c) = &mut draft.schedule {
+                            c.at = c.at.as_deref().map(|s| shift_time(s, days)).transpose()?;
+                            c.recurrence = None;
                         }
+                        // Do not recreate a deleted category from a stored template.
+                        if let Some(cat) = &draft.category_id {
+                            let exists: bool = tx.query_row(
+                                "SELECT EXISTS(SELECT 1 FROM categories WHERE id=?1)",
+                                [cat],
+                                |r| r.get(0),
+                            )?;
+                            if !exists {
+                                draft.category_id = None;
+                            }
+                        }
+                        let id = tasks::repository::insert_scheduled(tx, draft)?;
+                        let mut c = info(tx, &id)?.ok_or(ServiceError::InvalidSettings)?.config;
+                        c.recurrence = Some(rule.clone());
+                        tx.execute("UPDATE task_schedule SET series_id=?1,occurrence_date=?2,config_json=?3 WHERE task_id=?4",params![sid,day.to_string(),serde_json::to_string(&c)?,id])?;
+                        tasks::repository::schedule_audit(tx, &id, "recurrence_generate", None)?;
+                        generated += 1;
                     }
-                    let id = tasks::repository::insert_scheduled(tx, draft)?;
-                    let mut c = info(tx, &id)?.ok_or(ServiceError::InvalidSettings)?.config;
-                    c.recurrence = Some(rule.clone());
-                    tx.execute("UPDATE task_schedule SET series_id=?1,occurrence_date=?2,config_json=?3 WHERE task_id=?4",params![sid,day.to_string(),serde_json::to_string(&c)?,id])?;
-                    tasks::repository::schedule_audit(tx, &id, "recurrence_generate", None)?;
-                    generated += 1;
+                }
+                if generated >= 50 {
+                    break;
                 }
             }
-            if generated >= 50 {
-                break;
-            }
         }
+        supersede_pending(tx, &sid, &today_text, start)?;
         tx.execute(
             "UPDATE recurrence_series SET cursor_date=?1 WHERE id=?2",
             params![day.to_string(), sid],
