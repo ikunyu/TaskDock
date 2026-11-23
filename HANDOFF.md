@@ -146,7 +146,7 @@ cargo check --manifest-path src-tauri/Cargo.toml --all-targets --locked
 cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 ```
 
-若复制原工程且继续使用本机项目工具链，可先执行 `. .\scripts\Use-LocalToolchain.ps1`。脚本按自身位置定位 `.tools`，但工具链和 Windows SDK 本身是否可跨电脑使用仍需检查；新电脑推荐安装标准 MSVC 环境。
+若复制原工程且继续使用本机项目工具链，打开发版前执行 `. .\scripts\Initialize-BuildEnvironment.ps1`：它会加载 `.tools` 里的 cargo，若 Visual Studio 开发环境起不来（复制过来的 `.tools\vs` 没在系统注册，`Launch-VsDevShell` 会静默失败）就自动改用 `.tools\Use-StagedCompiler.ps1` 的编译器，并把构建临时目录指到工程内 `.build-tmp`，避免链接器写 `%TEMP%` 失败。脚本按自身位置定位 `.tools`，但工具链和 Windows SDK 本身是否可跨电脑使用仍需检查；新电脑仍推荐安装标准 MSVC 环境。
 
 需要前端预览时运行 `npm run dev`，不连接真实任务库。`npm run tauri -- dev` 会启动桌面服务并可能导入旧 AppData，必须由接手者明确决定在隔离账号/环境执行；本次交接没有运行。
 

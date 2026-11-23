@@ -2,7 +2,7 @@ param([switch]$NextBuild, [switch]$ci)
 $ErrorActionPreference = 'Stop'
 $taskdockRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $taskdockRoot
-. (Join-Path $PSScriptRoot 'Use-LocalToolchain.ps1')
+. (Join-Path $PSScriptRoot 'Initialize-BuildEnvironment.ps1')
 $taskdockConfigPath = Join-Path $taskdockRoot 'release-config.json'
 $taskdockConfig = Get-Content -LiteralPath $taskdockConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
 if ($NextBuild) {

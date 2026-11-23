@@ -51,3 +51,5 @@ exports/
 __pycache__/
 .vs/
 .idea/
+# Build scratch used by scripts/Initialize-BuildEnvironment.ps1
+/.build-tmp/

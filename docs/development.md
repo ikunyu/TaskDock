@@ -25,7 +25,7 @@ cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 npm run tauri -- build --no-bundle
 ```
 
-若使用本次项目内工具链，先执行 `. .\scripts\Use-LocalToolchain.ps1`（仅影响当前 PowerShell 进程）。`.tools` 不提交；标准安装的开发机无需该脚本。不要把工具链、target、运行数据或数据库加入版本控制。
+若使用本次项目内工具链，先执行 `. .\scripts\Initialize-BuildEnvironment.ps1`（仅影响当前 PowerShell 进程；它会准备 cargo、在需要时退回 `.tools` 自带编译器，并把构建临时目录指到工程内）。`.tools` 不提交；标准安装的开发机无需该脚本。不要把工具链、target、运行数据或数据库加入版本控制。
 
 ## 目录
 
