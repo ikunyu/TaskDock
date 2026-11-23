@@ -1,5 +1,7 @@
 # TaskDock 1.0.0 功能总览
 
+> 当前文件位置已迁到E盘；本文功能统计含历史基线，当前路径及版本见[迁移交接](path-migration-handoff.md)。
+
 整理日期：2026-10-30。数据库版本：Schema 5。
 
 按照本文的使用场景划分，当前软件包含 **11 大模块、59 项功能与基础能力**。数量按下方编号统计：同一功能在多个窗口中使用不重复计数，提醒时长选项不逐项计数，数据库表和 IPC 命令不算独立功能。
@@ -174,9 +176,9 @@
 
 ## 相关文件
 
-- 安装包：`F:\tododock\artifacts\release\TaskDock_1.0.0_x64-setup.exe`
-- 主程序：`F:\tododock\artifacts\release\TaskDock.exe`
-- 源码包：`F:\tododock\artifacts\release\TaskDock-1.0.0-source.zip`
+- 安装包：`E:\vibecoding\tododock\artifacts\release\TaskDock_1.2.2_x64-setup.exe`
+- 主程序：`E:\vibecoding\tododock\artifacts\release\TaskDock.exe`
+- 源码包：`E:\vibecoding\tododock\artifacts\release\TaskDock-1.2.2-source.zip`
 - [安装和使用说明](installation.md)
 - [数据管理说明](data-management.md)
 - [彻底删除说明](permanent-delete.md)

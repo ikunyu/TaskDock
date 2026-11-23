@@ -1,5 +1,7 @@
 # TaskDock
 
+> 当前开发目录：**E:\vibecoding\tododock**。旧F盘路径已失效；接手请先读[路径迁移交接](docs/path-migration-handoff.md)和[完整交接](HANDOFF.md)。
+
 面向 Windows 10/11 的本地桌面待办工作台。技术栈：Tauri v2、Vue 3、TypeScript、Pinia、Rust、SQLite。
 
 当前版本 **1.2.2 / Windows Release 与 NSIS 安装包**。支持任务创建、编辑、完成与撤销、确认后永久删除，任务工作区、心愿单、分类、计划与截止、优先级和子任务。主窗口、默认宽200、高度按内容调整的悬浮窗口及快速输入窗口共用 Rust LocalService 与 SQLite，事务提交后以 revision 事件同步。保留第一阶段明暗主题、受限 IPC、迁移和日志错误处理。

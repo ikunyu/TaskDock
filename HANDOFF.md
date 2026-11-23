@@ -1,21 +1,23 @@
 # TaskDock 项目交接文档
 
-更新日期：2026-11-06。适用于转移开发目录、换电脑、换 IDE 或交给其他开发者/AI 继续开发。本文记录当前源码和已有交付状态，不代表完整功能验收通过。
+> 当前路径以 [E盘迁移交接](docs/path-migration-handoff.md) 为准：**E:\vibecoding\tododock**。原 F:\tododock 已不存在；历史报告里的F盘路径仅用于追溯，不作为当前工作目录或文件链接。
+
+更新日期：2026-11-23。适用于转移开发目录、换电脑、换 IDE 或交给其他开发者/AI 继续开发。本文记录当前源码和已有交付状态，不代表完整功能验收通过。
 
 ## 1. 接手时的基线
 
-| 项目            | 当前状态                                                                                   |
-| --------------- | ------------------------------------------------------------------------------------------ |
-| 原开发目录      | `F:\tododock`；迁移后以新目录为准，运行数据位置由实际 EXE 路径决定                         |
-| 应用名称 / 标识 | TaskDock / `com.taskdock.desktop`                                                          |
-| 显示版本        | **1.2.2**；未经用户要求，不自动提高版本                                                    |
-| SQLite 目标     | **Schema 8**，8 个上行迁移、7 个下行脚本，共 15 个 SQL 文件                                |
-| 内部构建号      | **202611030007**，见 `release-config.json`                                                 |
-| 更新协议版本    | `1.0.0+202611030007`；与显示版本分开管理                                                   |
-| 源码仓库        | <https://github.com/ikunyu/TaskDock>；交接核对时为公开仓库，默认分支 main                  |
-| 业务代码基线    | `8be6f4a3f2dc163843a1f0d18ce418bf3b65b9fe`，锁图标透明度修复                               |
-| 远端核对        | 本次只读 fetch 后，本地 HEAD 与 origin/main 一致；新增本文的文档提交会晚于上述业务代码提交 |
-| 最新已发布构建  | <https://github.com/ikunyu/TaskDock/releases/tag/build-202611030007>                       |
+| 项目            | 当前状态                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| 当前开发目录    | E:\vibecoding\tododock；必须显式从此目录执行命令，旧F盘位置已失效                            |
+| 应用名称 / 标识 | TaskDock / `com.taskdock.desktop`                                                            |
+| 显示版本        | **1.2.2**；未经用户要求，不自动提高版本                                                      |
+| SQLite 目标     | **Schema 8**，8 个上行迁移、7 个下行脚本，共 15 个 SQL 文件                                  |
+| 内部构建号      | **202611030020**，见 `release-config.json`                                                   |
+| 更新协议版本    | `1.0.0+202611030020`；与显示版本分开管理                                                     |
+| 源码仓库        | <https://github.com/ikunyu/TaskDock>；交接核对时为公开仓库，默认分支 main                    |
+| 业务代码基线    | aaebb84915206b4d08744764bef786a2233343f4（以当前本地源码为准）                               |
+| 远端核对        | 本次只读fetch确认本地HEAD与origin/main一致；未重新发布程序                                   |
+| 本地交付构建    | artifacts/release/latest.json记录1.0.0+202611030020，应用1.2.2；GitHub最新发布状态以仓库为准 |
 
 后续接手先读取实际 `git status`、最新 main、`release-config.json`、`package.json`、`src-tauri/Cargo.toml` 和 `src-tauri/src/db.rs`，不能只按本文中的快照操作。
 
@@ -148,7 +150,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 
 需要前端预览时运行 `npm run dev`，不连接真实任务库。`npm run tauri -- dev` 会启动桌面服务并可能导入旧 AppData，必须由接手者明确决定在隔离账号/环境执行；本次交接没有运行。
 
-复制 `.git` 时，本机 `.git/config` 的 GitHub credential helper 包含 `F:/tododock/.private/gh` 和项目内 gh.exe 的绝对路径。改目录后需要修正或重新配置 Git 认证，不能假定能直接 push。新克隆不会带走这份本机配置。也不要把原机器的 Git 作者身份当作新开发者身份。
+本次已核对 `.git/config` 的 GitHub credential helper 已指向E盘，包含 `E:/vibecoding/tododock/.private/gh` 和项目内 gh.exe 的绝对路径。若以后再次改目录，需要重新核对该本机配置；本次不修改凭据或登录状态。新克隆不会带走这份本机配置。也不要把原机器的 Git 作者身份当作新开发者身份。
 
 ## 6. 构建、签名与 GitHub 发布
 
@@ -208,7 +210,7 @@ npm run package:windows
 
 ### 最新交付位置与参考哈希
 
-旧工程中位置是 `F:\tododock\artifacts\release\`；迁移后将前缀替换为新工程目录。
+当前交付目录是 `E:\vibecoding\tododock\artifacts\release\`。旧F盘路径不能再用于打开文件；历史产物记录不代表当前文件位置。
 
 | 文件                                               | 参考值                                                                                    |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -223,7 +225,7 @@ NSIS 按当前用户安装，缺少 WebView2 时联网安装运行时。普通�
 
 ## 7. 实际验证状态
 
-最新透明度修复构建已实际完成 TypeScript 检查、Rust all-targets 静态编译、Rust/受影响前端格式检查、Release/NSIS 构建及更新签名核对。已从公开更新地址下载清单和安装包并比对哈希。证据主要保存在旧工程：
+以下是早期1.1.1透明度修复阶段的验证记录，不代表当前1.2.2已重新完成验收；当时已实际完成 TypeScript 检查、Rust all-targets 静态编译、Rust/受影响前端格式检查、Release/NSIS 构建及更新签名核对。已从公开更新地址下载清单和安装包并比对哈希。相关历史证据可在已迁移工程的以下相对路径查找：
 
 - `artifacts/widget-lock-opacity-check.log`
 - `artifacts/github-update-lock-opacity-build.log`
@@ -231,7 +233,7 @@ NSIS 按当前用户安装，缺少 WebView2 时联网安装运行时。普通�
 - `artifacts/github-lock-opacity-publish-verification.json`
 - `artifacts/stage-6/outputs.json`
 
-这些 artifact 文件不在 Git 仓库，新克隆没有它们。最新迭代没有执行 npm test、cargo test、TaskDock 启动、GUI自动化、安装器运行或真实数据库迁移/恢复；早期阶段报告中通过的测试不能替代当前版本验收。
+这些 artifact 文件不在 Git 仓库，新克隆没有它们。本次路径交接没有执行 npm test、cargo test、TaskDock 启动、GUI自动化、安装器运行或真实数据库迁移/恢复；早期阶段报告中通过的测试不能替代当前版本验收。
 
 必须继续标为待验证：
 
@@ -267,7 +269,7 @@ NSIS 按当前用户安装，缺少 WebView2 时联网安装运行时。普通�
 
 ```text
 你接手的是 TaskDock Windows 桌面待办项目，请先读项目根目录 HANDOFF.md、README.md、CONTRIBUTING.md，再核对实际源码、Git状态和 release-config.json。
-原目录 F:\tododock，若已移动，以我提供的新目录为准。当前业务基线为1.2.2、Schema8、内部build202611030015；继续核对实际最新提交。
+当前项目根目录固定为 E:\vibecoding\tododock；旧F盘目录已不存在。工具调用必须显式使用这个E盘工作目录，不能沿用旧聊天中的cwd。若环境仍登记旧F盘路径，需要在当前E盘项目下继续工作。当前业务基线为1.2.2、Schema8、内部build202611030020；继续核对实际最新提交。
 保留唯一Rust LocalService、SQLite、revision事件、任务version乐观锁、设置草稿以及分窗口最小权限。
 保留最新的开锁/关锁图标、直接点击解锁和统一透明度实现；widget-lock辅助页仅负责输入，不重复绘制可见图标。
 不要重初始化、修改已发布迁移、删除用户数据、上传私钥或擅自提高显示版本。
