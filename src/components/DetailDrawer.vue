@@ -46,6 +46,9 @@ const draft = reactive<TaskDraft>(
 );
 const minimumDate = computed(() => (props.task ? '0001-01-01' : store.today));
 const wishlist = ref(props.task ? props.task.plannedDate === null : !!props.wishlist);
+// A repeating task has no deadline field of its own: its single date is the first
+// start of the cycle, chosen inside the repeat section when the task is created.
+const repeating = computed(() => !!draft.schedule?.recurrence);
 const legacyScheduling = computed(
   () =>
     !!props.task &&
@@ -141,7 +144,7 @@ async function save() {
   store.tick();
   try {
     if ((!wishlist.value || dueKind.value !== 'none') && !deadlineDate.value) {
-      error.value = '请选择截止日期。';
+      error.value = repeating.value ? '请选择第一次开始日期。' : '请选择截止日期。';
       return;
     }
     if (dueKind.value === 'time' && !dueTime.value) {
@@ -247,7 +250,7 @@ async function remove() {
       </label>
       <div class="form-grid">
         <DateField
-          v-if="!wishlist"
+          v-if="!wishlist && (task || !repeating)"
           :model-value="deadlineDate"
           @update:model-value="setDeadlineDate"
           label="截止日期"
@@ -325,7 +328,10 @@ async function remove() {
           :model-value="draft.schedule ?? emptySchedule()"
           :has-due="dueKind !== 'none' && !!deadlineDate"
           :busy="store.busy"
+          :start-date="deadlineDate"
+          :start-visible="!task"
           @update:model-value="draft.schedule = $event"
+          @update:start-date="setDeadlineDate"
         />
         <label v-if="task?.schedule?.seriesId"
           >修改范围<select v-model="draft.repeatScope" :disabled="store.busy">

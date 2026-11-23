@@ -10,10 +10,15 @@ const props = withDefaults(
     busy?: boolean;
     hasDue: boolean;
     minimumDate?: string;
+    startDate?: string | null;
+    startVisible?: boolean;
   }>(),
-  { minimumDate: '0001-01-01' },
+  { minimumDate: '0001-01-01', startDate: null, startVisible: false },
 );
-const emit = defineEmits<{ 'update:modelValue': [value: ScheduleConfig] }>();
+const emit = defineEmits<{
+  'update:modelValue': [value: ScheduleConfig];
+  'update:startDate': [value: string | null];
+}>();
 function update(patch: Partial<ScheduleConfig>) {
   emit('update:modelValue', { ...props.modelValue, ...patch });
 }
@@ -202,6 +207,15 @@ function before(m: number) {
       </select></label
     >
     <template v-if="modelValue.recurrence">
+      <DateField
+        v-if="startVisible"
+        label="第一次开始"
+        :model-value="startDate ?? null"
+        :min="minimumDate"
+        :disabled="busy"
+        required
+        @update:model-value="emit('update:startDate', $event)"
+      />
       <label
         >间隔（{{ frequency === 'weekly' ? '周' : frequency === 'monthly' ? '月' : '天' }}）<input
           type="number"
@@ -240,7 +254,7 @@ function before(m: number) {
         @update:model-value="repeat({ until: $event })"
       />
       <p class="muted small">
-        以任务上方的「截止日期」作为第一次开始日。同一时间只保留当前周期的一份：勾选完成后，下一个周期开始时自动
+        上面的「第一次开始」是第一个周期的日期。同一时间只保留当前周期的一份：勾选完成后，下一个周期开始时自动
         再生成一次；本周期没完成也会在下个周期重新生成，原来那份被替换。所选月份无该日期时取最后一天。
       </p>
     </template>
