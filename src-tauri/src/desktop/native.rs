@@ -100,7 +100,7 @@ pub fn fullscreen_foreground() -> bool {
             },
             WindowsAndMessaging::{
                 GetClassNameW, GetForegroundWindow, GetWindowLongW, GetWindowRect,
-                GetWindowThreadProcessId, GWL_STYLE, WS_CAPTION, WS_MAXIMIZE,
+                GetWindowThreadProcessId, GWL_STYLE, WS_MAXIMIZE,
             },
         },
     };
@@ -153,46 +153,46 @@ pub fn fullscreen_foreground() -> bool {
             return false;
         }
         let style = GetWindowLongW(hwnd, GWL_STYLE) as u32;
-        let caption = style & WS_CAPTION != 0;
         let maximized = style & WS_MAXIMIZE != 0;
-        if !(rect.left <= info.rcMonitor.left
-            && rect.top <= info.rcMonitor.top
-            && rect.right >= info.rcMonitor.right
-            && rect.bottom >= info.rcMonitor.bottom)
-        {
-            // A full-screen game that switches the display mode can report a
-            // window rect smaller than the monitor. Only that shape is worth one
-            // diagnostic line; a normal maximized or resized window lands here
-            // all the time and stays silent.
-            let monitor_width = info.rcMonitor.right - info.rcMonitor.left;
-            let monitor_height = info.rcMonitor.bottom - info.rcMonitor.top;
-            let nearly = (rect.right - rect.left) * 10 >= monitor_width * 9
-                && (rect.bottom - rect.top) * 10 >= monitor_height * 9;
+        // Physical-pixel comparisons land one or two pixels off for a game that
+        // switches modes, so allow a small slack instead of demanding an exact
+        // match with the monitor rectangle.
+        let monitor_rect = info.rcMonitor;
+        let work = info.rcWork;
+        let covers_monitor = rect.left <= monitor_rect.left + 2
+            && rect.top <= monitor_rect.top + 2
+            && rect.right >= monitor_rect.right - 2
+            && rect.bottom >= monitor_rect.bottom - 2;
+        // Covering area the taskbar normally occupies is what separates a
+        // full-screen window from an ordinary maximized one, which stops at the
+        // work area. A borderless game may keep a caption or report itself as
+        // maximized, so the style no longer decides on its own.
+        let beyond_work = rect.left < work.left
+            || rect.top < work.top
+            || rect.right > work.right
+            || rect.bottom > work.bottom;
+        let fullscreen = covers_monitor && (beyond_work || !maximized);
+        if covers_monitor && !fullscreen {
+            log::debug!("fullscreen check: {class} covers the monitor but is a maximized window");
+        }
+        if !covers_monitor && !fullscreen {
+            // Only windows that nearly fill the screen are worth one diagnostic
+            // line; ordinary windows land here constantly and stay quiet.
+            let nearly = (rect.right - rect.left) * 10 >= (monitor_rect.right - monitor_rect.left) * 9
+                && (rect.bottom - rect.top) * 10 >= (monitor_rect.bottom - monitor_rect.top) * 9;
             static HINTED: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
             if nearly
-                && !maximized
                 && HINTED.swap(hwnd as isize, std::sync::atomic::Ordering::Relaxed) != hwnd as isize
             {
                 log::info!(
-                    "fullscreen check: {class} covers {}/{} x {}/{} of the monitor, window {}x{} at {},{}, style {:#x}",
-                    rect.right - rect.left,
-                    monitor_width,
-                    rect.bottom - rect.top,
-                    monitor_height,
-                    rect.right - rect.left,
-                    rect.bottom - rect.top,
-                    rect.left,
-                    rect.top,
-                    style
+                    "fullscreen check: {class} window {},{}-{},{} against monitor {},{}-{},{} (work {},{}-{},{}), maximized={maximized}, style {style:#x}",
+                    rect.left, rect.top, rect.right, rect.bottom,
+                    monitor_rect.left, monitor_rect.top, monitor_rect.right, monitor_rect.bottom,
+                    work.left, work.top, work.right, work.bottom
                 );
             }
-            return false;
         }
-        // A borderless full-screen game usually keeps WS_CAPTION and only lets
-        // DWM hide the frame, while a normal window that sits on the monitor
-        // because the taskbar auto-hides is a maximized window. Use that to tell
-        // them apart instead of requiring the caption to be gone.
-        !(caption && maximized)
+        fullscreen
     }
 }
 #[cfg(not(windows))]
