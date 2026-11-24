@@ -115,17 +115,9 @@ html[data-window='widget'] #app {
 }
 /* Expanded: every group is a framed block and every task a smaller frame. */
 .window-widget .widget-layout:not(.widget-collapsed) .widget-group {
-  border: 0;
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 4px 6px 6px;
-  box-shadow:
-    var(--ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-:root[data-theme='dark'] .window-widget .widget-layout:not(.widget-collapsed) .widget-group {
-  box-shadow:
-    var(--ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .window-widget .widget-layout:not(.widget-collapsed) .widget-group .task-list {
   display: grid;
@@ -133,14 +125,9 @@ html[data-window='widget'] #app {
   gap: 3px;
 }
 .window-widget .widget-layout:not(.widget-collapsed) .task-compact {
-  border: 0;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1px 8px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f6fa 100%);
-  box-shadow: var(--ring), var(--elev-1);
-}
-:root[data-theme='dark'] .window-widget .widget-layout:not(.widget-collapsed) .task-compact {
-  background: linear-gradient(180deg, #2b2b31 0%, #232328 100%);
 }
 /* Collapsed: groups are split by a rule and tasks only by spacing. */
 .widget-collapsed .widget-group + .widget-group {

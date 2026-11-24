@@ -26,7 +26,7 @@ body,
 .sidebar {
   width: 230px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #f9f9fd 0%, #eff1f7 100%);
+  background: var(--sidebar);
   border-right: 1px solid var(--border);
   padding: 30px 17px 18px;
   display: flex;
@@ -247,7 +247,7 @@ body,
   border: 0;
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--highlight), var(--ring), var(--elev-1), var(--elev-2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   min-height: 315px;
   display: flex;
   align-items: center;
@@ -374,10 +374,7 @@ body,
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f7f8fc 100%);
-}
-:root[data-theme='dark'] .widget-layout {
-  background: linear-gradient(180deg, #212126 0%, #1a1a1e 100%);
+  background: var(--surface);
 }
 .widget-header {
   display: flex;
@@ -601,18 +598,4 @@ body,
   .list-heading .small {
     display: none;
   }
-}
-
-/* Material: dark sidebar and elevated overlays. */
-:root[data-theme='dark'] .sidebar {
-  background: linear-gradient(180deg, #202026 0%, #15151a 100%);
-}
-.detail-drawer {
-  box-shadow: var(--ring), var(--elev-2);
-}
-.welcome-card {
-  box-shadow: var(--highlight), var(--ring), var(--elev-1);
-}
-.note-card {
-  box-shadow: var(--ring);
 }
