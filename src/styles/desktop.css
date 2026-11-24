@@ -31,10 +31,10 @@ html[data-window='widget'] #app {
 .desktop-settings select {
   width: 100%;
   min-height: 36px;
-  background: var(--surface);
+  background: var(--fill);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 7px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   padding: 6px 10px;
 }
 .desktop-settings .setting-check {
@@ -116,8 +116,8 @@ html[data-window='widget'] #app {
 /* Expanded: every group is a framed block and every task a smaller frame. */
 .window-widget .widget-layout:not(.widget-collapsed) .widget-group {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px 5px 5px;
+  border-radius: 14px;
+  padding: 4px 6px 6px;
 }
 .window-widget .widget-layout:not(.widget-collapsed) .widget-group .task-list {
   display: grid;
@@ -126,8 +126,8 @@ html[data-window='widget'] #app {
 }
 .window-widget .widget-layout:not(.widget-collapsed) .task-compact {
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1px 6px;
+  border-radius: 10px;
+  padding: 1px 8px;
 }
 /* Collapsed: groups are split by a rule and tasks only by spacing. */
 .widget-collapsed .widget-group + .widget-group {

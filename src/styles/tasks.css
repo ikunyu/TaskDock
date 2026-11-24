@@ -41,16 +41,15 @@ progress::-webkit-progress-value {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border: 0;
+  border-radius: var(--radius-pill);
   padding: 9px 16px;
-  background: var(--surface);
+  background: var(--fill);
   color: var(--muted);
 }
 .task-view-tabs button[aria-pressed='true'] {
   color: var(--accent);
   background: var(--accent-soft);
-  border-color: var(--accent);
 }
 .task-view-tabs button span {
   font-size: 11px;
@@ -59,7 +58,7 @@ progress::-webkit-progress-value {
   display: flex;
   align-items: flex-start;
   gap: 13px;
-  padding: 18px 20px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--border);
 }
 .task-row:last-child {
@@ -90,7 +89,7 @@ progress::-webkit-progress-value {
   position: absolute;
   inset: 7px;
   border: 1.5px solid var(--muted);
-  border-radius: 3px;
+  border-radius: 50%;
 }
 .task-completion > svg {
   position: relative;
@@ -100,10 +99,7 @@ progress::-webkit-progress-value {
   background: var(--accent);
 }
 .task-completion[aria-checked='true'] {
-  color: var(--surface);
-}
-:root[data-theme='dark'] .task-completion[aria-checked='true'] {
-  color: #201a38;
+  color: var(--check-mark);
 }
 .task-delete.app-button {
   width: 28px;
@@ -216,11 +212,12 @@ progress {
 .filter-label select,
 .quick-options select {
   max-width: 165px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--surface);
-  padding: 7px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--fill);
+  padding: 7px 10px;
   color: var(--text);
+  font-size: 12px;
 }
 .loading-copy {
   padding: 50px 24px;
@@ -241,14 +238,15 @@ progress {
   line-height: 1.8;
   color: var(--error-text);
   background: var(--error-bg);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   overflow-wrap: anywhere;
 }
 .dialog-backdrop {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: #15132666;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,8 +260,8 @@ progress {
 .dialog-panel {
   background: var(--surface);
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  border: 0;
+  border-radius: var(--radius-xl);
   padding: 22px;
   width: min(550px, 100%);
   max-height: calc(100vh - 40px);
@@ -314,13 +312,13 @@ progress {
 .task-form input:not([type='checkbox']):not([type='color']),
 .task-form select,
 .task-form textarea {
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
   width: 100%;
   min-width: 0;
   color: var(--text);
-  background: var(--canvas);
+  background: var(--fill);
 }
 .task-form textarea {
   resize: vertical;

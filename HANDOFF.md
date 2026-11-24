@@ -214,8 +214,8 @@ npm run package:windows
 
 | 文件                                               | 参考值                                                                                    |
 | -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `TaskDock.exe`                                     | 19,240,448字节；SHA256 `F4328FD628D12A5E5D04F7AF3FA0A1BC68073DA4FA5B3BBFAE5CBC584D50461D` |
-| `TaskDock_1.2.2_x64-setup.exe`                     | 6,642,755字节；SHA256 `87FB8F46CFCABFC799D9FD23CD6B62DB2AAB89DFEC6D7CED1AEF0E3F25935548`  |
+| `TaskDock.exe`                                     | 19,240,448字节；SHA256 `A3D8B4CFE711E601FD8E44D3A62122203438EEB7A321CE26A6A32947A771FB0E` |
+| `TaskDock_1.2.2_x64-setup.exe`                     | 6,642,792字节；SHA256 `1EF2FAEC4AB5A3030A5ED6F1E5489E4EEE253CC4BCDE8E449C48257FC99F2D9D`  |
 | `TaskDock-1.2.2-source.zip`                        | 源码归档，无私钥/凭据/任务数据；新增交接文档后归档内容及哈希可能更新                      |
 | `latest.json`、`.exe.sig`、`UPDATE-SHA256SUMS.txt` | 更新清单、签名与发布资产校验信息                                                          |
 

@@ -1,40 +1,54 @@
 :root {
-  font-family: 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  /* iOS-style system typography: SF on Apple platforms, Segoe UI Variable here. */
+  font-family:
+    -apple-system, 'SF Pro Text', 'Segoe UI Variable Display', 'Segoe UI Variable', 'Segoe UI',
+    'Microsoft YaHei', sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --accent: #6558d4;
-  --accent-hover: #5547c2;
-  --accent-soft: #eeeafa;
-  --canvas: #fafafc;
-  --surface: #fff;
-  --sidebar: #f3f3f8;
-  --text: #262736;
-  --muted: #767787;
-  --border: #e8e8ef;
-  --success: #448b70;
-  --error-bg: #fff0ef;
-  --error-text: #ad3432;
-  --shadow: 0 12px 50px #22223a14;
+  /* System palette, light. */
+  --accent: #007aff;
+  --accent-hover: #0062cc;
+  --accent-soft: rgba(0, 122, 255, 0.12);
+  --canvas: #f2f2f7;
+  --surface: #ffffff;
+  --sidebar: #f2f2f7;
+  --text: #000000;
+  --muted: rgba(60, 60, 67, 0.6);
+  --border: rgba(60, 60, 67, 0.16);
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-strong: rgba(118, 118, 128, 0.2);
+  --success: #34c759;
+  --error-bg: rgba(255, 59, 48, 0.12);
+  --error-text: #ff3b30;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+  --check-mark: #ffffff;
   color-scheme: light;
   color: var(--text);
   background: var(--canvas);
   font-size: 14px;
 }
 :root[data-theme='dark'] {
-  --accent: #b4a5ff;
-  --accent-hover: #c5baff;
-  --accent-soft: #302a48;
-  --canvas: #1a1b22;
-  --surface: #21222c;
-  --sidebar: #17181f;
-  --text: #ececf4;
-  --muted: #a0a1b4;
-  --border: #343541;
-  --success: #82c9aa;
-  --error-bg: #472727;
-  --error-text: #ffb8b3;
-  --shadow: 0 12px 50px #0005;
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-soft: rgba(10, 132, 255, 0.22);
+  --canvas: #000000;
+  --surface: #1c1c1e;
+  --sidebar: #1c1c1e;
+  --text: #ffffff;
+  --muted: rgba(235, 235, 245, 0.6);
+  --border: rgba(84, 84, 88, 0.65);
+  --fill: rgba(118, 118, 128, 0.24);
+  --fill-strong: rgba(118, 118, 128, 0.36);
+  --success: #30d158;
+  --error-bg: rgba(255, 69, 58, 0.18);
+  --error-text: #ff6961;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 * {
@@ -62,12 +76,18 @@ select {
 }
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 button {
   color: inherit;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
 }
 ::selection {
   background: var(--accent-soft);
@@ -81,11 +101,12 @@ p {
 h1 {
   font-size: 36px;
   letter-spacing: -1px;
-  font-weight: 650;
+  font-weight: 700;
 }
 h2 {
   font-size: 18px;
   font-weight: 600;
+  letter-spacing: -0.2px;
 }
 svg {
   flex-shrink: 0;
@@ -101,59 +122,67 @@ svg {
   color: var(--muted);
   letter-spacing: 0.5px;
 }
+/* Filled capsule buttons, the way iOS renders its default controls. */
 .app-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--border);
-  padding: 9px 14px;
-  border-radius: 8px;
-  background: var(--surface);
+  border: 0;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--fill);
   font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
   min-height: 36px;
-  transition: background 0.15s;
+  transition:
+    background 0.18s ease,
+    transform 0.12s ease;
 }
 .app-button:hover:not(:disabled) {
-  background: var(--sidebar);
+  background: var(--fill-strong);
+}
+.app-button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 .button-primary {
   background: var(--accent);
-  color: var(--surface);
-  border-color: transparent;
-}
-:root[data-theme='dark'] .button-primary {
-  color: #201a38;
+  color: #fff;
 }
 .button-primary:hover:not(:disabled) {
   background: var(--accent-hover);
 }
 .button-ghost {
-  border-color: transparent;
   background: transparent;
   color: var(--muted);
 }
+.button-ghost:hover:not(:disabled) {
+  background: var(--fill);
+  color: var(--text);
+}
 .button-danger {
-  color: var(--error-text);
   background: var(--error-bg);
-  border-color: var(--error-text);
+  color: var(--error-text);
 }
 .button-danger:hover:not(:disabled) {
   background: var(--error-bg);
   box-shadow: inset 0 0 0 1px var(--error-text);
 }
+/* App icon: a rounded squircle with a soft top highlight. */
 .brand-mark {
   display: inline-grid;
   place-items: center;
   width: 36px;
   height: 36px;
-  background: #6558d4;
-  color: white;
+  background: linear-gradient(180deg, #3fa4ff 0%, #007aff 100%);
+  color: #fff;
   font-size: 25px;
   line-height: 1;
   border-radius: 11px;
-  box-shadow: 0 3px 8px #6558d425;
+  box-shadow:
+    0 4px 12px rgba(0, 122, 255, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 .brand-mark.tiny {
   width: 24px;
@@ -173,9 +202,10 @@ svg {
   gap: 6px;
   font-size: 11px;
   color: var(--muted);
-  padding: 5px 9px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  padding: 5px 10px;
+  border: 0;
+  background: var(--fill);
+  border-radius: var(--radius-pill);
 }
 .phase-badge > span,
 .status-dot {
