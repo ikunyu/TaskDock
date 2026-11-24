@@ -10,7 +10,6 @@ import AppIcon from '../components/AppIcon.vue';
 import AppButton from '../components/AppButton.vue';
 import ThemeSelect from '../components/ThemeSelect.vue';
 import DetailDrawer from '../components/DetailDrawer.vue';
-import CategoryManager from '../components/CategoryManager.vue';
 import TaskList from '../components/TaskList.vue';
 import { bridge, nativeMode } from '../services/bridge';
 import { useAppStore } from '../stores/app';
@@ -71,7 +70,6 @@ const selected = ref<TaskView>('today'),
   categoryFilter = ref('');
 const drawer = ref(false),
   selectedId = ref<string | null>(null),
-  categoriesOpen = ref(false),
   notice = ref('');
 watch(
   () => store.revision,
@@ -222,9 +220,6 @@ async function openWindow(label: 'widget' | 'quick-entry') {
         >
           <AppIcon name="plan" /><span>周概览</span>
         </button>
-        <button class="nav-item" @click="categoriesOpen = true">
-          <AppIcon name="folder" /><span>分类管理</span>
-        </button>
         <div class="sidebar-divider" />
         <div class="workspace-label">桌面空间</div>
         <button class="nav-item" @click="openWindow('widget')">
@@ -362,6 +357,5 @@ async function openWindow(label: 'widget' | 'quick-entry') {
       "
     />
     <SettingsPanel v-if="settingsOpen" @close="settingsOpen = false" />
-    <CategoryManager v-if="categoriesOpen" @close="categoriesOpen = false" />
   </div>
 </template>
